@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">OkHttpExample</string>
+    <string name="choosen_planet">El planeta elegido se llama: </string>
+</resources>

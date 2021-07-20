@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frameObjAnim"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btnBarrel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Barrel roll"
+        app:layout_constraintEnd_toStartOf="@+id/btnSin"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnSin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Esquivar"
+        app:layout_constraintEnd_toStartOf="@+id/btnAlpha"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@id/btnBarrel"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnAlpha"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Invencible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@id/btnSin"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnTiny"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Encongerse"
+        app:layout_constraintEnd_toStartOf="@id/btnStart"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnBarrel" />
+
+    <Button
+        android:id="@+id/btnStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ir al inicio"
+        app:layout_constraintEnd_toStartOf="@id/btnPivot"
+        app:layout_constraintStart_toEndOf="@id/btnTiny"
+        app:layout_constraintTop_toBottomOf="@id/btnBarrel" />
+
+
+    <Button
+        android:id="@+id/btnPivot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mover pivote"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@id/btnStart"
+        app:layout_constraintTop_toBottomOf="@id/btnBarrel" />
+
+    <ImageView
+        android:id="@+id/arwing"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/arwing"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

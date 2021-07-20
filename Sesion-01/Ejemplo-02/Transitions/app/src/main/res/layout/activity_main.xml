@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:layout_marginVertical="16dp"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/btnTransitions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Transition simple"
+        />
+    <Button
+        android:id="@+id/btnTransitionSet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Transitions múltiples"
+        />
+    <Button
+        android:id="@+id/btnNoScene"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Transition sin Scene"
+        />
+    <Button
+        android:id="@+id/btnActivityTransition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Transition de un Activity"
+        />
+    <Button
+        android:id="@+id/btnSharedElement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Transition de elemento Compartido"
+        />
+
+</LinearLayout>

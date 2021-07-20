@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:paddingTop="48dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CURSOS BEDU"
+        android:textSize="32sp"
+        android:textColor="#DDDDDD"
+        android:textStyle="bold"
+        />
+    <ImageView
+        android:scaleType="fitCenter"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:src="@drawable/bedu"
+        android:layout_marginTop="16dp"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hemos agregado el curso de kotlin avanzado a nuestro catálogo, para mayor información, visita nuestro sitio oficial https://bedu.org/"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"
+        android:paddingHorizontal="48dp"
+        />
+
+</LinearLayout>

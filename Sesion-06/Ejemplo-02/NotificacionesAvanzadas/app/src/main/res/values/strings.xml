@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">Notifications</string>
+
+
+    <!-- textos para la push simple -->
+    <string name="simple_title">Bedu</string>
+    <string name="simple_body">¡Esta es nuestra primera notificación creada!</string>
+
+    <string name="simple_title_2">Bedu</string>
+    <string name="simple_body_2">¡Segunda notificación para probar los grupos!</string>
+
+    <string name="simple_title_3">Bedu</string>
+    <string name="simple_body_3">¡Y otra notificación extra!</string>
+
+    <!-- textos para la push con acción -->
+    <string name="action_title">Cursos Bedu</string>
+    <string name="action_body">¡Espera los nuevos cursos que Bedu ha preparado para ti!</string>
+
+    <!-- textos para la push con botón -->
+    <string name="button_title">Bedu</string>
+    <string name="button_body">Da click en el botón de abajo para ejecutar una acción</string>
+    <string name="button_text">Aceptar</string>
+
+    <!-- texto para la push expansible -->
+    <string name="large_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</string>
+
+
+    <!-- CANAL CURSOS -->
+    <string name="channel_courses">Cursos</string>
+    <string name="courses_description">Notificaciones acerca de cursos impartidos</string>
+
+    <!-- CANAL OTROS -->
+    <string name="channel_others">Diversos</string>
+    <string name="others_description">Otras notificaciones</string>
+
+</resources>
