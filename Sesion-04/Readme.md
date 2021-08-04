@@ -40,18 +40,6 @@ Crearemos una base de datos SQLite con ayuda de Room Database.
 - [**`EJEMPLO 2`**](Ejemplo-02/Readme.md)
 - [**`RETO 2`**](Reto-02/Readme.md)
 
----
-
-
-<ins>Aplicación de Realm</ins>
-
-Utilizaremos la librería 3rd party ___Realm___ y gestionaremos mediante esta ORM una base de datos.
-
-- [**`EJEMPLO 3`**](Ejemplo-03/Readme.md)
-- [**`RETO 3`**](Reto-03/Readme.md)
-
----
-
  
 
 ### 3. Proyecto :hammer:
@@ -65,6 +53,17 @@ Aplica los lineamientos que vienen en esta guía para definir y comenzar el desa
 Esta es una guía anexa de consejos para una mejor planeación de tu proyecto para este módulo.
 
 - [**`POSTWORK SESIÓN 4`**](Postwork/Readme.md)
+
+
+
+### 5. Temas adicionales  :open_book:
+
+<ins>Aplicación de Realm</ins>
+
+Utilizaremos la librería 3rd party ___Realm___ y gestionaremos mediante esta ORM una base de datos.
+
+- [**`EJEMPLO 3`**](Ejemplo-03/Readme.md)
+- [**`RETO 3`**](Reto-03/Readme.md)
 
 <br/>
 
