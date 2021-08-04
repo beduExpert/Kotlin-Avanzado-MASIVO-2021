@@ -30,22 +30,11 @@ Estructuraremos nuestro código con este patrón.
 
 ---
 
- 
-
-#### <ins>RxKotlin</ins>
-
-Implementaremos el patrón observer a través de una librería de terceros llamada ReactiveX, en la versiǿn para kotlin. Esta difiere un poco a la implementación viste con LiveData.
-
-- [**`EJEMPLO 2`**](Ejemplo-02/Readme.md)
-
-
----
-
 ####  <ins>Architecture Components</ins>
 
 Utilizaremos el patrón de arquitectura propuesto por Jetpack para estructurar nuestro proyecto. 
 
-- [**`EJEMPLO 3`**](Ejemplo-03)
+- [**`EJEMPLO 2`**](Ejemplo-02)
 
 ### 3. Proyecto :hammer:
 
@@ -58,6 +47,14 @@ Aplica los lineamientos que vienen en esta guía para definir y comenzar el desa
 Esta es una guía anexa de consejos para una mejor planeación de tu proyecto para este módulo.
 
 - [**`POSTWORK SESIÓN 7`**](Postwork/Readme.md)
+
+### 5. Temas adicionales :open_book:
+
+#### <ins>RxKotlin</ins>
+
+Implementaremos el patrón observer a través de una librería de terceros llamada ReactiveX, en la versiǿn para kotlin. Esta difiere un poco a la implementación viste con LiveData.
+
+- [**`EJEMPLO 3`**](Ejemplo-03/Readme.md)
 
 <br/>
 
