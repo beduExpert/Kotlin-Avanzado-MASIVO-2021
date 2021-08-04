@@ -38,7 +38,6 @@ Mediante esta clase, registraremos receptores capaces de escuchar emisiones de e
 Un content provider proporciona una implementación de una interfaz que actúa como gestor del contenido de una aplicación, permitiendo que otro agente acceda y manipule nuestra información de forma eficiente y segura. En este ejemplo abordaremos los pasos esenciales para lograr su propósito.
 
 - [**`EJEMPLO 2`**](Ejemplo-02/Readme.md)
-- [**`RETO 2`**](Reto-02/Readme.md)
 
 ---
 
@@ -55,6 +54,12 @@ Aplica los lineamientos que vienen en esta guía para definir y comenzar el desa
 Esta es una guía anexa de consejos para una mejor planeación de tu proyecto para este módulo.
 
 - [**`POSTWORK SESIÓN 5`**](Postwork/Readme.md)
+
+### 5. Temas adicionales  :open_book:
+
+<ins>Content Providers</ins>
+
+[**`RETO 2:`** Implementa el método update() del content provider](Reto-02/Readme.md)
 
 <br/>
 
