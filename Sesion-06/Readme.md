@@ -129,13 +129,6 @@ Agregaremos elementos a las notificaciones que las personalizar y ajustan al con
 
 * [**`EJEMPLO 3`**](Ejemplo-03/Readme.md)
 
-#### <ins>Crashlytics</ins>
-
-Crearemos reportes de errores en nuestra aplicación y los visualizaremos dentro de la consola de Firebase.
-
-* [**`EJEMPLO 4`**](Ejemplo-04)
-
-* [**`RETO 3`**](Reto-03)
 
 ### 3. Proyecto :hammer:
 
@@ -155,3 +148,12 @@ Esta es una guía anexa de consejos para una mejor planeación de tu proyecto pa
 
 </div>
 
+### 5. Temas adicionales  :open_book:
+
+#### <ins>Crashlytics</ins>
+
+Crearemos reportes de errores en nuestra aplicación y los visualizaremos dentro de la consola de Firebase.
+
+* [**`EJEMPLO 4`**](Ejemplo-04)
+
+* [**`RETO 3`**](Reto-03)
