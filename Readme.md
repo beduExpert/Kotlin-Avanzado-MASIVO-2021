@@ -12,15 +12,22 @@ Este módulo tiene como  finalidad aplicar conceptos concurrentes en el desarrol
 
 ### :memo:  Contenido
 
- - [Sesión 1: Animaciones y Transiciones](Sesion-01/Readme.md) 
- - [Sesión 2: Networking](Sesion-02/Readme.md) 
- - [Sesión 3: Acceso a Hardware](Sesion-03/Readme.md) 
- - [Sesión 4: Persistencia y Bases de Datos](Sesion-04/Readme.md) 
- - [Sesión 5: App Components](Sesion-05/Readme.md) 
- - [Sesión 6: Firebase y Notifications](Sesion-06/Readme.md) 
- - [Sesión 7: Patrones de arquitectura](Sesion-07/Readme.md) 
- - [Sesión 8: Testing](Sesion-08/Readme.md)  
+El módulo consta de 8 sesiones en su mayoría prácticas que abordarán los siguientes temas:
+
+| Sesión | Tema                                                 | Descripción                                       |
+| ------ | ---------------------------------------------------- | ------------------------------------------------- |
+| 1      | [Animaciones y Transiciones](Sesion-01/Readme.md)    | Enriquece la experiencia de usuario.              |
+| 2      | [Networking](Sesion-02/Readme.md)                    | Comunícate con sistemas remotos.                  |
+| 3      | [Acceso a Hardware](Sesion-03/Readme.md)             | Captura con la cámara y utiliza tu GPS.           |
+| 4      | [Persistencia y Bases de Datos](Sesion-04/Readme.md) | Almacena diversos tipos de datos.                 |
+| 5      | [App Components](Sesion-05/Readme.md)                | Implementa los componentes esenciales de Android. |
+| 6      | [Firebase y Notifications](Sesion-06/Readme.md)      | Expande tu app con los servicios de firebase.     |
+| 7      | [Patrones de arquitectura](Sesion-07/Readme.md)      | Estructura tu código fuente.                      |
+| 8      | [Testing](Sesion-08/Readme.md)                       | Crea pruebas automatizadas.                       |
+
+
 
 [`Siguiente`](Sesion-01/Readme.md)
 
 </div>
+
