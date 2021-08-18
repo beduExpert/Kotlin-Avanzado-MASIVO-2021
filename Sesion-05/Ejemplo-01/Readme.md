@@ -11,7 +11,7 @@
 * Emitir una señal para un receiver específico
 
 * Emitir una señal implícita desde una aplicación
-* Escuchar señales explícitas y explícitas
+* Escuchar señales implícitas y explícitas
 * Implementar callbacks al recibir emisiones
 
 ### 2. Requisitos :clipboard:

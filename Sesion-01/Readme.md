@@ -10,7 +10,7 @@
 ### 1. Objetivos :dart: 
 
 - Indicar al usuario el estado de la aplicación mediante animaciones
-- Crear trancisiones entre pantallas de forma orgánica
+- Crear transiciones entre pantallas de forma orgánica
 
 ### 2. Contenido :blue_book:
 

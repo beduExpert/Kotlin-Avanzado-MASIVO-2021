@@ -118,7 +118,7 @@ Crearemos notificaciones locales sencillas desde nuestra app.
 
 <ins>Notificaciones avanzadas</ins>
 
-Agregaremos elementos a las notificaciones que las personalizar y ajustan al contexto en que se utilizan. 
+Agregaremos elementos a las notificaciones que las personalizan y ajustan al contexto en que se utilizan. 
 
 - [**`EJEMPLO 2`**](Ejemplo-02/Readme.md)
 - [**`RETO 2`**](Reto-02/Readme.md)

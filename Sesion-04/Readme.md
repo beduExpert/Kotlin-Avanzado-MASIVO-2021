@@ -46,7 +46,7 @@ Crearemos una base de datos SQLite con ayuda de Room Database.
 
 Aplica los lineamientos que vienen en esta guía para definir y comenzar el desarrollo de tu proyecto.
 
-- [**`PROYECTO SESIÓN 3`**](Proyecto/Readme.md)
+- [**`PROYECTO SESIÓN 4`**](Proyecto/Readme.md)
 
 ### 4. Postwork :memo:
 
