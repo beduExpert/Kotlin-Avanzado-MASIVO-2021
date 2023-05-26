@@ -28,17 +28,13 @@ El menú principal de esta aplicación consta de una serie de botones que nos ll
 
 ##### Scenes y Transitions
 
-
-
 Previamente abordamos cómo animar Views a través de animators. Las animaciones requieren configurar ciertos parámetros para personalizarla. Esto resulta conveniente para varias ocasiones, pero qué pasa si queremos animar el cambio en un layout? Utilizar un _Animator_ podría ser problemático. Afortunadamente, android provee de un framework llamado que crea animaciones entre escenas, estos son los ___transitions___.
 
 Un ***Transition*** es una clase capaz de crear una transición entre dos escenas, cada ___Scene___ representa el estado de una jerarquía de views, incluyendo sus propiedades (posición, tamaño, color, etc.). Dichas scenes se pueden representar mediante layouts o incluso de forma dinámica via código. Con dos Scenes, podemos establecer un estado inicial y uno final para una jerarquía de Views.
 
-
-
 Primero, crearemos las dos escenas a animar: ___scene_one___ y ___scene_two___, que serán recursos en la carpeta ___layout___.
 
-Dentro de ___scene_one___ pondremos el estado inicial de nuestro archivo:
+Dentro de ___scene_one___ pondremos el estado inicial de nuestro archivo.
 
 
 
@@ -223,13 +219,8 @@ val transition = ChangeBounds().apply {
 Ahora, para hacer el cambio dependiendo de la escena actual, implemenamos lo siguiente:
 
 ```kotlin
-currentScene = if(currentScene == sceneOne){
-    TransitionManager.go(sceneTwo,transition)
-    sceneTwo
-} else{
-    TransitionManager.go(sceneOne,transition)
-    sceneOne
-}
+currentScene = if (currentScene == sceneOne) sceneTwo else sceneOne
+TransitionManager.go(currentScene, transition)
 ```
 
 
@@ -283,13 +274,8 @@ En ___TransitionSetActivity___, podremos notar que las asignaciones de las *Scen
 ```kotlin
 binding.btnTransitionSet.setOnClickListener {
     val transition = TransitionInflater.from(this).inflateTransition(R.transition.transition_set)
-    currentScene = if(currentScene == sceneOne){
-        TransitionManager.go(sceneThree,transition)
-        sceneThree
-    } else{
-        TransitionManager.go(sceneOne,transition)
-        sceneOne
-    }
+currentScene = if(currentScene == sceneOne) sceneThree else sceneOne
+TransitionManager.go(currentScene, transition)
 }
 ```
 
@@ -320,8 +306,6 @@ Con esto, al reproducir nuestra transición obtenemos lo siguiente:
 
 Existen algunos casos en donde no es necesario definir dos layouts diferentes que creen una transición, esto sucede cuando los cambios entre las dos jerarquías son mínimos, como desaparecer algún elemento de la jerarquía o aplicar un cambio menor. Para estos casos, podemos utilizar una transición sin escenas, esto se realiza realizando el cambio menor en la jerarquía y ejecutando el método ___beginDelayedTransition()___ de nuestro __TransitionManager__.
 
-
-
 En el layout correspondiente a ___ActivityNoScene___ Podemos encontral una pantalla que simula los ajustes de perfil, el objetivo es animar la desaparición del texto. Para agregar el código, tenemos qué gestionar el evento de cambio de estado en el switch, por lo que declaremos:
 
 ```kotlin
@@ -334,8 +318,8 @@ después de la flecha pondremos nuestro código. Para la animación, crearemos u
 
 ```kotlin
 val transition = Slide(Gravity.END)
-            TransitionManager.beginDelayedTransition(view,transition)
-            binding.textEmail.visibility = if(isChecked) View.INVISIBLE else View.VISIBLE
+TransitionManager.beginDelayedTransition(view,transition)
+binding.textEmail.visibility = if(isChecked) View.INVISIBLE else View.VISIBLE
 ```
 
 
@@ -366,14 +350,13 @@ val editText = EditText(this).apply {
        addTarget(binding.button)
    }
    
-   
    val transitionSet = TransitionSet().apply {
        addTransition(editTextTransition)
        addTransition(buttonTransition)
    }
    TransitionManager.beginDelayedTransition(view, transitionSet)
    ```
-
+   
 3. Agregaremos el _EditText_ a nuestro ___ViewGroup___
 
    ```kotlin

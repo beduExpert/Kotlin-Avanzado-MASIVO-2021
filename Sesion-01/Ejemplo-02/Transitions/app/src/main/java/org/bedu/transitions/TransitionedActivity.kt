@@ -2,12 +2,10 @@ package org.bedu.transitions
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.transition.Fade
 import android.transition.Slide
 import android.view.Gravity
-import android.view.View
-import android.view.Window
 import org.bedu.transitions.databinding.ActivitySharedTransitionedBinding
+import org.bedu.utils.getActionBarView
 
 class TransitionedActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,16 +15,13 @@ class TransitionedActivity : AppCompatActivity() {
 
         title = "Receptor"
 
-        //definiendo el tipo de transición
+        // definiendo el tipo de transición
         val transition = Slide(Gravity.TOP).apply {
             duration = 500
-            excludeTarget(window.decorView.findViewById<View>(R.id.action_bar_container), true)
+            excludeTarget(getActionBarView(), true)
             excludeTarget(android.R.id.statusBarBackground, true)
             excludeTarget(android.R.id.navigationBarBackground, true)
         }
-
-
-
 
         window.enterTransition = transition
     }

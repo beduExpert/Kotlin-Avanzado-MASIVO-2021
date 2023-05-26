@@ -20,14 +20,12 @@ class SharedTransitionActivity: AppCompatActivity() {
 
         title = "Emisor"
 
-
-        //Definimos el tipo de transición del elemento compartido en la función startActivity
+        // Definimos el tipo de transición del elemento compartido en la función startActivity
         binding.btnActivity2.setOnClickListener {
 
             val intent = Intent(this, SharedTransitionedActivity::class.java)
 
-            //se obtiene el nombre de la transción para identificar nuestros diseños, crear las escenas
-            //y la animación de la transición
+            // se obtiene el nombre de la transción para identificar nuestros diseños, crear las escenas
             val options = ViewCompat.getTransitionName(binding.imgConcert)?.let {
                 ActivityOptionsCompat.makeSceneTransitionAnimation(
                     this, binding.imgConcert, it

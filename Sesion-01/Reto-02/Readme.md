@@ -30,11 +30,10 @@ Esto implica agregar el título __Conciertos__ en ambos _layouts_ de los _activi
 Donde:
 
 * __context__ es el contexto de nuestro _activity_
+
 * __sharedElements__ es uno o varios objetos de la clase ___androidx.core.util.Pair___, que son pares ___view,string___ donde se ingresa el _view_ a compartir y su *transitionName*.
 
-
-
-
+  
 
 <details>
 	<summary>Solucion</summary>

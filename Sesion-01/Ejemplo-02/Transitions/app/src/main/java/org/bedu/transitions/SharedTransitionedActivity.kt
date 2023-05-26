@@ -6,7 +6,6 @@ import org.bedu.transitions.databinding.ActivitySharedTransitionedBinding
 
 
 class SharedTransitionedActivity: AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivitySharedTransitionedBinding.inflate(layoutInflater)

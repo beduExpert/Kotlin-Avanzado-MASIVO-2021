@@ -26,13 +26,8 @@ class TransitionSetActivity : AppCompatActivity() {
 
         binding.btnTransitionSet.setOnClickListener {
             val transition = TransitionInflater.from(this).inflateTransition(R.transition.transition_set)
-            currentScene = if(currentScene == sceneOne){
-                TransitionManager.go(sceneThree,transition)
-                sceneThree
-            } else{
-                TransitionManager.go(sceneOne,transition)
-                sceneOne
-            }
+            currentScene = if(currentScene == sceneOne) sceneThree else sceneOne
+            TransitionManager.go(currentScene, transition)
         }
 
     }

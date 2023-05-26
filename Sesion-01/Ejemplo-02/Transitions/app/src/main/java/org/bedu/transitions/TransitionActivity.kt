@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.transition.*
 import android.view.animation.AccelerateInterpolator
-import org.bedu.transitions.R
 import org.bedu.transitions.databinding.ActivityTransitionBinding
 
 class TransitionActivity : AppCompatActivity() {
@@ -34,13 +33,8 @@ class TransitionActivity : AppCompatActivity() {
                 interpolator = AccelerateInterpolator()
                 duration = 500
             }
-            currentScene = if(currentScene == sceneOne){
-                TransitionManager.go(sceneTwo,transition)
-                sceneTwo
-            } else{
-                TransitionManager.go(sceneOne,transition)
-                sceneOne
-            }
+            currentScene = if (currentScene == sceneOne) sceneTwo else sceneOne
+            TransitionManager.go(currentScene, transition)
         }
     }
 }

@@ -9,8 +9,6 @@ import org.bedu.transitions.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -18,18 +16,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         val view = binding.root
         setContentView(view)
 
-
-        binding.btnTransitions.setOnClickListener(this)
-        binding.btnTransitionSet.setOnClickListener(this)
-        binding.btnNoScene.setOnClickListener(this)
-        binding.btnActivityTransition.setOnClickListener(this)
-        binding.btnSharedElement.setOnClickListener(this)
-
+        binding.run {
+            btnTransitions.setOnClickListener(this@MainActivity)
+            btnTransitionSet.setOnClickListener(this@MainActivity)
+            btnNoScene.setOnClickListener(this@MainActivity)
+            btnActivityTransition.setOnClickListener(this@MainActivity)
+            btnSharedElement.setOnClickListener(this@MainActivity)
+        }
     }
 
     override fun onClick(v: View?) {
 
-        val activity = when(v?.id){
+        val activity = when(v?.id) {
             R.id.btnTransitions ->  TransitionActivity::class.java
             R.id.btnTransitionSet ->  TransitionSetActivity::class.java
             R.id.btnNoScene ->  NoSceneActivity::class.java
