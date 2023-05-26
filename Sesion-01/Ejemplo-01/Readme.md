@@ -18,30 +18,25 @@
 
 ### 3. Desarrollo :computer:
 
-
-
-
-
 #### Property Animations
-
-
 
 Las propiedades son:
 
 * ___translationX___ y ___translationY___: Mueve un ___View___ desde una posición inicial hsta una final, con respecto al sistema de coordenadas.
+
 * ___rotation___, ___rotationX___ y ___rotationY___: controla la rotación, mientras que rotationX y rotationY controlan la rotación en un espacio tridimensional.
+
 * ___scaleX___ y ___scaleY___: La escala con respecto a una dimensión (para x es el ancho, para y es el largo).
+
 * ___pivotX___ y ___pivotY___: El pivote es un punto en el ___View___ de referencia para aplicar la tranformación de escalamiento y rotación, y por defecto está situado en su centro. Con estas propiedades podemos redefinir la posición del pivote.
+
 * ___x___ y ___y___: Controla la posición del ___View___ con respecto a su container.
+
 * ___alpha___: Determina la transparencia del ___View___, donde 0 es totalmente transparente y 1 es totalmente opaco.
 
-
-
-
+  
 
 #### Configuración inicial
-
-
 
 El siguiente ejemplo consiste en realizar una serie de animaciones a una nave de Star Fox. El layout _main_activity.xml_ tiene la siguiente configuración:
 
@@ -51,15 +46,9 @@ El siguiente ejemplo consiste en realizar una serie de animaciones a una nave de
 
 Mediante los botones accionaremos dichas animaciones.
 
-
-
 #### Value Animators
 
-
-
 La clase ___ValueAnimator___ es una extensión 100% utilizable de la calse ___Animation___. Esta calcula los valores de la propiedad animada, y comunica las actualizaciones de dicho valor a través de un listener, donde podremos actualizar la propiedad de nuestro objeto a animar y hacer acciones extras.  
-
-
 
 Vamos a animar un barrel roll (giro) mediante ___rotation___.
 
@@ -78,10 +67,12 @@ val valueAnimator = ValueAnimator.ofFloat(0f, 720f)
 A este objeto vamos a agregarle un listener que va a activarse cuando el flotante se actualice, aquí actualizaremos nuestra propiedad de rotación de nuestro ___View___. 
 
 ```kotlin
- valueAnimator.addUpdateListener {
-        val value = it.animatedValue as Float //obteniendo el valor actual
-        arwing.rotationX = value //asignando la posición de rotación
-    }
+valueAnimator.run {
+            addUpdateListener {
+                val value = it.animatedValue as Float
+                 binding.arwing.rotationY = value
+            }
+        }
 ```
 
 
@@ -91,8 +82,8 @@ Finalmente, configuraremos  la duración de la animación y la reproducimos.
 
 
 ```kotlin
- valueAnimator.duration = 1000 
- valueAnimator.start()
+duration = 1_000
+start()
 ```
 
 
@@ -100,16 +91,20 @@ Finalmente, configuraremos  la duración de la animación y la reproducimos.
 El método queda así:
 
 ```kotlin
-private fun barrelRoll() {
-   
-    valueAnimator.addUpdateListener {
-        val value = it.animatedValue as Float
-        arwing.rotation = value 
-    }
+    private fun barrelRoll() {
+        val valueAnimator = ValueAnimator.ofFloat(0f, 720f)
 
-    valueAnimator.duration = 1000 
-    valueAnimator.start()
-}
+        valueAnimator.run {
+            addUpdateListener {
+                val value = it.animatedValue as Float
+                 binding.arwing.rotationY = value
+            }
+
+            interpolator = AccelerateDecelerateInterpolator()
+            duration = 1_000
+            start()
+        }
+    }
 ```
 
 
@@ -276,26 +271,25 @@ Vamos a reaccionar a estos eventos declarando un listener para el animator, impr
 
 ```kotlin
 addListener(object : AnimatorListener {
-                override fun onAnimationStart(animation: Animator?) {
-                    Toast.makeText(applicationContext, "iniciando blinking", Toast.LENGTH_SHORT)
+                override fun onAnimationStart(animation: Animator) {
+                    Toast.makeText(this@MainActivity, "iniciando blinking", Toast.LENGTH_SHORT)
                         .show()
                 }
 
-                override fun onAnimationEnd(animation: Animator?) {
-                    Toast.makeText(applicationContext, "terminando blinking", Toast.LENGTH_SHORT)
+                override fun onAnimationEnd(animation: Animator) {
+                    Toast.makeText(this@MainActivity, "terminando blinking", Toast.LENGTH_SHORT)
                         .show()
                 }
 
-                override fun onAnimationCancel(animation: Animator?) {
-                    Toast.makeText(applicationContext, "blinking cancelado", Toast.LENGTH_SHORT)
+                override fun onAnimationCancel(animation: Animator) {
+                    Toast.makeText(this@MainActivity, "blinking cancelado", Toast.LENGTH_SHORT)
                         .show()
                 }
 
-                override fun onAnimationRepeat(animation: Animator?) {
-                    Toast.makeText(applicationContext, "repitiendo parpadeo", Toast.LENGTH_SHORT)
+                override fun onAnimationRepeat(animation: Animator) {
+                    Toast.makeText(this@MainActivity, "repitiendo parpadeo", Toast.LENGTH_SHORT)
                         .show()
                 }
-
             })
 ```
 
