@@ -37,10 +37,6 @@ Ahora utilizaremos el cliente Retrofit diseñado para aplicaciones android, resa
 - [**`EJEMPLO 2`**](Ejemplo-02/Readme.md)
 - [**`RETO 2`**](Reto-02/Readme.md)
 
- 
-
-- `**](Reto-01/Readme.md)
-
 ---
 
  
@@ -50,7 +46,6 @@ Ahora utilizaremos el cliente Retrofit diseñado para aplicaciones android, resa
 Combinaremos Retrofit con corrutinas para usar http methods.
 
 - [**`EJEMPLO 3`**](Ejemplo-03/Readme.md)
-- [**`RETO 2`**](Reto-03/Readme.md)
 
  
 
