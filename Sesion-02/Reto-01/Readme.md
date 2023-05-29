@@ -1,129 +1,96 @@
 [`Kotlin Avanzado`](../../Readme.md) > [`Sesión 02`](../Readme.md) > `Reto 1`
 
-## Reto 1: OkHttp y ListView
+## Reto 1: OkHttp Avanzado
 
 <div style="text-align: justify;">
 
 
+
+
 ### 1. Objetivos :dart:
 
-- Que el alumnno asimile el uso del cliente OkHttp 
-- Que se integre la información recuperada a algún componente
+Poner en práctica los conceptos aprendidos en el [Ejemplo 01](../Ejemplo-01)
 
 ### 2. Requisitos :clipboard:
 
-1. Haber leído el Prework de OkHttp3
-2. Terminar el [Ejemplo 01](../Ejemplo-01)
+1. Haber cursado dicho tema en la exposición.
+2. Haber finalizado el [Ejemplo 01](../Ejemplo-01)
 
 ### 3. Desarrollo :computer:
 
-Tomando como referencia el primer Ejemplo, crearemos una app capaz de recuperar la información de 10 planetas de star wars y desplegarlos
-en una lista (aplicar el conociemiento de la [Sesión 02](../../Sesion-02)). Cada elemento de la lista debe mostrar el planeta y el tipo de terreno (name y terrain).
+Este proyecto es una adaptación del ejemplo 2.
 
-La aplicación debe verse así:
+Buscamos sólamente imprimir en consola el resultado de la lista entera de gente de star wars, pero con Gson.
 
-<img align="center" src="images/01.png" width="33%">
+por lo tanto, requerimos mostrar una pantalla así:
 
+<img src="/Users/dancu/Documents/bedu/C1-Kotlin-Avanzado/Sesion-03/Reto-02/01.png" width="35%">
 
+* El json tiene la siguiente estructura: 
 
-* La vista de cada elemento de la lista tendrá el siguiente layout (llamado **item_planet.xml**): 
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:background="#F3F3F3"
-    android:paddingVertical="8dp"
-    android:paddingHorizontal="12dp"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <TextView
-            android:text="Planeta:  "
-            android:textStyle="bold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <TextView
-            android:id="@+id/tvPlanet"
-            android:paddingVertical="4dp"
-            android:text="tatooine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-    </LinearLayout>
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <TextView
-            android:text="Terreno:  "
-            android:textStyle="bold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <TextView
-            android:id="@+id/tvTerrain"
-            android:paddingVertical="4dp"
-            android:text="Desierto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-    </LinearLayout>
-
-</LinearLayout>
-```
-
-* la url de la petición ahora es la base, para recuperar toda la lista
-
-```kotlin
-private val url = "https://swapi.dev/api/planets/"
-```
-abajo también declaramos nuestro adaptador y nuestro arreglo (el nombre lo sugerimos, pero puedes poner cualquier otro)
-
-```kotlin
-private lateinit var adapter: PlanetAdapter
-    var planetList = ArrayList<Planet>()
-```
-
-
-*La estructura del JSON recibido ahora es más compleja, siendo cada planeta un objeto dentro de un arreglo, dentro del objeto raíz:
-```json
+```js
 {
-...
-"results":[
-{...},
-{...},
-{...},
-]
+    ...
+    "results": [
+        {...},
+	{...},
+	]
 }
-
 ```
 
-Por lo tanto, para recuperar la info con los JSONObjects, se utiliza lo siguiente: 
+por lo tanto, necesitamos una clase data que tenga dicha estructura.
 
-```kotlin
-try {
-	val json = JSONObject(body) //se obtiene el objeto raíz
-	val array = json.getJSONArray("results") //se obtiene el arreglo de planetas
-	val numPlanets = array.length() -1 //el número máximo para ejecutar el ciclo for
-        for (i in 0.. numPlanets){ //ciclo for para todos los planetas
-		val planeta = array.getJSONObject(i)  //así obtenemos el planeta del arreglo
+* Recuerda que con @SerializedName("nombreVar") puedes asignarle otro nombre a la variable sin que coincida con el del response, en el data class de Gson.
 
-		//TODO: recuperar la información que requerimos del planeta y guardarla en el arreglo que va en el adapter
-	}
+* La nueva url es la siguiente: https://swapi.dev/api/people/
+
+* En el log tiene qué dar el siguiente resultado:
+
+```bash
+JediList(jediList=[Jedi(name=Luke Skywalker, height=172, mass=77), Jedi(name=C-3PO, height=167, mass=75), Jedi(name=R2-D2, height=96, mass=32), Jedi(name=Darth Vader, height=202, mass=136), Jedi(name=Leia Organa, height=150, mass=49), Jedi(name=Owen Lars, height=178, mass=120), Jedi(name=Beru Whitesun lars, height=165, mass=75), Jedi(name=R5-D4, height=97, mass=32), Jedi(name=Biggs Darklighter, height=183, mass=84), Jedi(name=Obi-Wan Kenobi, height=182, mass=77)])
 ```
 
-*No olvidar que la actualización de los items en el ListView se hace de la siguiente forma:
+**Recordar** que todo arreglo en un json puede ser representado con un ArrayList en Gson.
+
+<details>
+<summary>Solucion</summary>
+
 
 ```kotlin
-fun populateAdapter(data: ArrayList<Planet>){
-        planetList.clear()
-        planetList.addAll(data)
-        adapter.notifyDataSetChanged()
+    package org.bedu.advancedokhttp
+    
+    import com.google.gson.annotations.SerializedName
+    
+    data class Jedi(
+        val name: String? = "",
+        val height: Int? = 0,
+        val mass: Int? =0
+    )
+    
+    data class JediList(
+       @SerializedName("results") //el nombre real
+        val jediList: ArrayList<Jedi>
+    )
+```
+
+para la respuesta a la llamada: 
+```kotlin
+override fun onResponse(call: Call, response: Response) {
+    val body = response.body?.string()
+    try {
+        val newList = Gson().fromJson(body,JediList::class.java)
+        Log.d("Response",newList.toString())
+
+
+    } catch (e: JSONException) {
+        e.printStackTrace()
     }
+}
 ```
+
+</details>
+
+
 
 [`Anterior`](../Ejemplo-01) | [`Siguiente`](../Ejemplo-02)      
 

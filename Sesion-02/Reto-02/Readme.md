@@ -1,77 +1,51 @@
-[`Kotlin Avanzado`](../../Readme.md) > [`Sesión 02`](../Readme.md) > `Reto 2`
+[`Kotlin Avanzado`](../../Readme.md) > [`Sesión 02`](../Readme.md) > `Reto 2 `
 
-## Reto 2: OkHttp Avanzado
+## Reto 2: Retrofit
 
 <div style="text-align: justify;">
 
 
-
-
 ### 1. Objetivos :dart:
 
-Poner en práctica los conceptos aprendidos en el [Ejemplo 02](../Ejemplo-02)
+- Implementar HttpLogging 
+- Notificar al usuario si algo salió mal
 
 ### 2. Requisitos :clipboard:
 
-1. Haber cursado dicho tema en la exposición.
-2. Haber finalizado el [Ejemplo 02](../Ejemplo-02)
+1. Haber terminado TODOS los ejercicios anteriores.
 
 ### 3. Desarrollo :computer:
 
-Este proyecto es una adaptación del ejemplo 2.
+Para terminar con nuestro pokedex, debemos ser capaces de notificar al usuario cuando un pokemon no existe, y de rastrear detalles del tráfico.
 
-Buscamos sólamente imprimir en consola el resultado de la lista entera de gente de star wars, pero con Gson.
+  1. Instalar la siguiente dependencia
 
-por lo tanto, requerimos mostrar una pantalla así:
+ ```groovy
+ implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
+ ```
 
-<img src="/Users/dancu/Documents/bedu/C1-Kotlin-Avanzado/Sesion-03/Reto-02/01.png" width="35%">
+ 2.- Vamos a agregar el cliente okHttp a nuestro build de retrofit, para eso hay que definir antes el cliente por medio de esta líneas de código:
 
-* El json tiene la siguiente estructura: 
+ ```groovy
+ val client = OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .connectTimeout(TIMEOUT_CALL_SECONDS, TimeUnit.SECONDS)
+                .readTimeout(TIMEOUT_CALL_SECONDS, TimeUnit.SECONDS)
+                .writeTimeout(TIMEOUT_CALL_SECONDS, TimeUnit.SECONDS)
+                .build()
+ ```
 
-```js
-{
-    ...
-    "results": [
-        {...},
-	{...},
-	]
-}
-```
+ El reto es donde suscribir al cliente para que tome efecto (**Hint:** es algo que ya se vio).
 
-por lo tanto, necesitamos una clase data que tenga dicha estructura.
+ El resultado es la impresión en el logcat que sucede cuando se hace una llamada con retrofit:
 
-* Recuerda que con @SerializedName("nombreVar") puedes asignarle otro nombre a la variable sin que coincida con el del response, en el data class de Gson.
+ <img src="images/01.png" width="33%">
 
-* En el log tiene qué dar el siguiente resultado:
+ 3.- Agregar un mensaje (puede ser un Toast) que le notifique al usuario cuando el pokemon que ingresó es inexistente o hay un problema de comunicación. (**Hint:** es en los callbacks de retrofit).
 
-```bash
-JediList(jediList=[Jedi(name=Luke Skywalker, height=172, mass=77), Jedi(name=C-3PO, height=167, mass=75), Jedi(name=R2-D2, height=96, mass=32), Jedi(name=Darth Vader, height=202, mass=136), Jedi(name=Leia Organa, height=150, mass=49), Jedi(name=Owen Lars, height=178, mass=120), Jedi(name=Beru Whitesun lars, height=165, mass=75), Jedi(name=R5-D4, height=97, mass=32), Jedi(name=Biggs Darklighter, height=183, mass=84), Jedi(name=Obi-Wan Kenobi, height=182, mass=77)])
-```
+ El mensaje se debe ver parecido a esto: 
 
-**Recordar** que todo arreglo en un json puede ser representado con un ArrayList en Gson.
-
-<details>
-<summary>Solucion</summary>
-
-
-```kotlin
-    package org.bedu.advancedokhttp
-    
-    import com.google.gson.annotations.SerializedName
-    
-    data class Jedi(
-        val name: String? = "",
-        val height: Int? = 0,
-        val mass: Int? =0
-    )
-    
-    data class JediList(
-       @SerializedName("results") //el nombre real
-        val jediList: ArrayList<Jedi>
-    )
-```
-
-</details>
+  <img src="images/02.png" width="33%">
 
 
 

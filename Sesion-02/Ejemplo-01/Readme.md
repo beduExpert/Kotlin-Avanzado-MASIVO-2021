@@ -1,128 +1,183 @@
 [`Kotlin Avanzado`](../../Readme.md) > [`Sesión 02`](../Readme.md) > `Ejemplo 1`
 
-## Ejemplo 1: OkHttp y HttpUrlConnection
+## Ejemplo 1: Interceptores y GSON
 
 <div style="text-align: justify;">
 
 
 
+
 ### 1. Objetivos :dart:
 
-* Que el alumno aprenda a manejar la librería OkHttp y sus funcionalidades para hacer peticiones a un servidor.
+- Que el usuario aprenda a interceptar peticiones y modificarlas 
+- Que implemente la librería GSON para obtener en un mejor formato las respuestas de una petición
 
 ### 2. Requisitos :clipboard:
 
-1. Tener conocimientos previos de protocolo HTTP y de clientes para comunicación web.
-2. Haber tomado la sección de OkHttp de la sesión 3 del curso.
+1. Haber terminado el [Ejemplo 01](../Ejemplo-01)
+2. Haber terminado el [Reto 01](../Reto-01)
+3. Haber estudiado previamente estos temas en las diapositivas
 
 ### 3. Desarrollo :computer:
 
-OkHttp es un cliente http para aplicaciones android y Java. Goza de ser uno de los clientes más utilizados y por eso la importancia de ejemplificarla :shipit:. 
+El siguiente ejercicio será similar al primero
+
+Contaremos con una tarjeta que contendrá datos esenciales de un jedi. Por medio de un Interceptor cambiaremos al jedi por un sith y la información la recuperaremos con GSON.
 
 
-1. Creamos un proyecto con *Activity* en blanco.
+1. Crear un proyecto con actividad en blanco.
 
-2. Para instalar la dependencia, agregamos esta línea en nuestro *build.gradle* dentro de la carpeta *app*
+2. Agregar la dependencia Gson a gradle.
 
 ```kotlin
-implementation("com.squareup.okhttp3:okhttp:4.9.0")
+implementation 'com.google.code.gson:gson:2.8.6' 
 ```
 
-3. Sincronizamos el proyecto con el botón *Sync project with gradle files* para aplicar los cambios e instalar la dependencia.
+3. En *AndroidManifest.xml*, agregar el permiso a Internet.
 
-4. Debemos agregar el permiso de internet en nuestro *manifest*, de otra manera la aplicación crasheará al querer hacer una petición.
-
-```xml
-<uses-permission android:name="android.permission.INTERNET" />
-```
-
-y esta String en **strings.xml**:
-
-```xml
-    <string name="choosen_planet">El planeta elegido se llama: </string>
-```
-
-5. Creamos un layout con dos botones: Uno para hacer una llamada síncrona y otra para una asíncrona:
+4. Utilizar este layout para mayor velocidad.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-    
-    <Button
-        android:text="llamada asíncrona"
-        android:id="@+id/btnRequest"
+
+    <androidx.cardview.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:layout_width="280dp"
+        android:layout_height="170dp"
+        android:id="@+id/card_view"
+        card_view:cardCornerRadius="4dp"
+        android:layout_marginTop="24dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+                >
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:textStyle="bold"
+                    android:text="Nombre:  "
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+                <TextView
+                    android:text="---"
+                    android:id="@+id/tvName"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:textStyle="bold"
+                    android:text="Altura:  "
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+                <TextView
+                    android:text="---"
+                    android:id="@+id/tvHeight"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:textStyle="bold"
+                    android:text="Peso:  "
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+                <TextView
+                    android:text="---"
+                    android:id="@+id/tvWeight"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+        </LinearLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <Button
+        android:text="Jedi"
+        android:id="@+id/btnJedi"
+            android:layout_marginRight="12dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_marginTop="24dp"/>
+        <Button
+            android:text="Sith"
+            android:id="@+id/btnSith"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"/>
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Aun no hay llamada"
-        app:layout_constraintBottom_toTopOf="@+id/btnRequest"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.77" />
-
-    <Button
-        android:id="@+id/btnSincrono"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Llamada síncrona"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnRequest"
-        app:layout_constraintVertical_bias="0.110000014" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
 ```
 
-6. Declaramos la url base como variable de nuestra clase: 
+5. en MainActivity, definir la url de donde recuperaremos info, y setear los click listeners de cada botón (Jedi y Sith):
 
 ```kotlin
-private val baseUrl = "https://swapi.dev/api/planets/"
+    private val url = "https://swapi.dev/api/people/1/"
+    private val binding: ActivityMainBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(binding.root)
+
+        binding.btnJedi.setOnClickListener{
+            llamarALaFuerza()
+        }
+
+        binding.btnSith.setOnClickListener{
+            llamarALaFuerza(true)
+        }
+    }
 ```
 
-y en *onCreate()*, setearemos el listener de nuestro botón asíncrono:
+6. definimos nuestra función *llamarALaFuerza*, que se encarga de recuperar los datos del sitio:
 
 ```kotlin
- btnRequest.setOnClickListener{
-        llamadaAsincrona()
-}
-```
-
-7.- vamos a crear la función *llamadaAsincrona()*, donde estableceremos el código para hacer una petición, recordemos que la petición se hará en un hilo y al momento de obtener la respuesta, un callback se ejecutara en otro hilo. La información que recopilaremos es acerca de los planetas de star wars.
-
-Crearemos una instancia del cliente, generaremos la url con el número de planeta que queremos (uno random), generaremos el objeto de la petición y la enviamos con **enqueue()**, definiremos los callbacks de respuesta recibida y error, y correremos la aplicación.
-
-```kotlin
-fun llamadaAsincrona(){
+   fun llamarALaFuerza(isSith: Boolean = false){
 
         //instanciando al cliente
         val okHttpClient = OkHttpClient()
-
-        //obteniendo la url completa
-        val planetNumber = Random.nextInt(1,60) //son 60 planetas
-        val url = "$baseUrl$planetNumber/"
 
         //El objeto Request contiene todos los parámetros de la petición (headers, url, body etc)
         val request = Request.Builder()
             .url(url)
             .build()
 
-        //enviando y recibiendo las llamadas de forma asíncrona
-        okHttpClient.newCall(request).enqueue(object : Callback {
+        val clientBuilder = okHttpClient.newBuilder()
+
+        //si es sith, permitiremos que el interceptor modifique la url
+        if(isSith){
+            clientBuilder.addInterceptor(InterceptCharacter())
+        }
+
+            clientBuilder.build()
+            .newCall(request)
+            .enqueue(object : Callback {
 
             //el callback a ejecutar cuando hubo un error
             override fun onFailure(call: Call, e: IOException) {
@@ -132,112 +187,126 @@ fun llamadaAsincrona(){
             //el callback a ejectutar cuando obtuvimos una respuesta
             override fun onResponse(call: Call, response: Response) {
                 val body = response.body?.string()
-                Log.d("Response: ", body)
+                body?.let { Log.d("Response: ", it) }
 
+                try {
+
+                    val jedi = Gson().fromJson(body,Jedi::class.java)
+
+                    println(jedi.toString())
+
+                    runOnUiThread {
+                        binding. tvName.text = jedi.name
+                        binding.tvHeight.text = jedi.height.toString()
+                        binding.tvWeight.text = jedi.mass.toString()
+                    }
+
+                   /*val json = JSONObject(body)
+                    val name = json.getString("name")
+                    val height = json.getString("height")
+                    val mass = json.getString("mass")
+
+                    runOnUiThread{
+                        tvName.text = name
+                        tvHeight.text = height
+                        tvWeight.text = mass
+                    }*/
+
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
             }
         })
     }
 ```
 
-8.-¡Bien! ahora, en vez de imprimir el json recibido, imprimiremos en el textView únicamente el nombre del planeta. Para ello utilizaremos JSONObject, que vuelve un objeto al json obtenido y corremos la app. El código de abajo va dentro del *onResponse*.
+y corremos con cualquier botón, qué información obtiene? Nada distinto a los ejercicios anteriores.
+
+<img src="images/01.png" width="33%">
+
+7.- Ahora vamos a hacer que cuando se aplaste el botón de los sith, nos aparezca darth vader en vez de Luke. Para eso usaremos nuestro Interceptor:
 
 ```kotlin
- val json = JSONObject(body)
-val phrase = getString(R.string.choosen_planet)
-val planet = json.getString("name")
+class InterceptCharacter : Interceptor{
 
-Log.d("Response: ", "name: $planet")
+    //la nueva url que va a sustituir a la anterior
+    private val NEW_URL = "https://swapi.dev/api/people/4/"
 
-```
+    //override de la clase Interceptor
+    override fun intercept(chain: Interceptor.Chain): Response {
 
-9.- Ahora, vamos a reemplazar la impresión a consola en el nombre, para ponerlo en el textView
+        //creamos un new builder
+        val requestBuilder = chain.request().newBuilder()
 
-```kotlin
-textView.text ="$phrase $planet"
-```
+        //nuevo header agregado por el interceptor
+        requestBuilder.addHeader("X-Been","Intercepted");
 
-¿Qué sucedió? consulten el *logcat* y comenten cuál es la causa.
+        //cambiamos la url
+        requestBuilder.url(NEW_URL)
 
-10. saldrá un error parecido a esto:
-
-```bash
- 1576735063.300 15128-15156/org.bedu.okhttpexample E/AndroidRuntime: FATAL EXCEPTION: OkHttp Dispatcher
-    Process: org.bedu.okhttpexample, PID: 15128
-    android.view.ViewRootImpl$CalledFromWrongThreadException: Only the original thread that created a view hierarchy can touch its views.
-```
-
-Esto se debe a que estamos seteando el texto del textView en un hilo que no es el principal (ahí se infló la vista). Metemos entonces esa línea dentro de **runUiThread**
-
-```bash
- runOnUiThread{
-     textView.text ="$phrase $planet"
-}
-```
-
-Y corremos la aplicación. Veremos algo similar a esto: 
-
-<p align:"center">
-        <img src="images/01.png" width="30%"/>
-</p>
-
-11.- Ahora crearemos nuestra *llamadaSincrona()*
-
-```kotlin
-    //Nuestro thread se bloquea hasta recuperar la información
-    fun llamadaSincrona(){
-
-        val client = OkHttpClient()
-
-        //obteniendo la url completa
-        val planetNumber = Random.nextInt(1,61) //son 61 planetas
-        val url = "$baseUrl$planetNumber/"
-
-        val request =  Request.Builder()
-                .url(url)
-                .build()
-
-        try {
-            val response = client.newCall(request).execute()
-            val body = response.body?.string()
-            Log.d("Response: ", body)
-
-            val json = JSONObject(body)
-            val phrase = getString(R.string.choosen_planet)
-            val planet = json.getString("name")
-            runOnUiThread{
-                textView.text ="$phrase $planet"
-            }
-        } catch (e: Error){
-            Log.e("Error",e.toString())
-        }
+        //regresamos el builder modificado
+        return chain.proceed(requestBuilder.build())
+        //response.newBuilder.body(<a_new_body_response>);
     }
-```
-
-y la metemos como listener de nuestro botón síncrono:
-
-```kotlin
-btnSincrono.setOnClickListener{
-        llamadaSincrona()
 }
 ```
 
-corremos la app y ejecutamos el botón...
+El interceptor forma parte de la dependencia de okhttp3 y es este caso, ccrea un nuevo builder con los parámetros que quería modificar, y lo devuelvo.
 
-¿Qué sucedió? Coméntalo conn tus compañeros
-
-12.- El error se debe a que no se puede pausar el hilo principal (Main Thread), por lo que tendremos qué meter nuestro callback dentro de un Thread alterno:
+8. Vamos a agregar la línea de código que permitirá la intercepción:
 
 ```kotlin
-btnSincrono.setOnClickListener{
-            Thread{
-                llamadaSincrona()
-            }.start()
-        }
+val clientBuilder = okHttpClient.newBuilder()
+
+        //si es sith, permitiremos que el interceptor modifique la url
+        if(isSith){   <-------------AGREGAR
+            clientBuilder.addInterceptor(InterceptCharacter()) <--------AGREGAR
+        } <-----AGREGAR
+
+            clientBuilder.build()
+            .newCall(request)
+            .enqueue(object : Callback {
 ```
 
-Corre la aplicación y ¡Éxito! la respuesta debe ser parecida a la anterior.
+estas tres líneas de códigos nos dicen que si nos volvemos sith, llamamos al interceptor que cambia la url y por eso darth vader se despliega en vez de luke.
+
+9. Utilizaremos Gson para facilitar la serialización y conversión de JSON a objetos fáciles de tratar, a diferencia de los JsonObject.
+
+Los datos que ocupamos son: nombre, altura y peso. Por lo tanto vamos a crear un modelo desde kotlin:
+
+```kotlin
+data class Jedi(
+    val name: String? = "",
+    val height: Int? = 0,
+    val mass: Int? =0
+)
+```
+
+El null safety en las variables nos sirvfe para evitar una excepción si en alguna de las respuestas no existitera uno de estos parámetros desde externo (si la info está demás, podemos omitir lo que no es necesario).
+
+10. Por último, ocupamos una simple fusión de Gson para convertirlo a mi objeto y sea fácil de organizar.
+
+```kotlin
+ //el callback a ejectutar cuando obtuvimos una respuesta
+            override fun onResponse(call: Call, response: Response) {
+                val body = response.body?.string()
+                Log.d("Response: ", body)
+
+                try {
+
+                    val jedi = Gson().fromJson(body,Jedi::class.java)
+
+                    println(jedi.toString())
+
+                    runOnUiThread{
+                        tvName.text = jedi.name
+                        tvHeight.text = jedi.height.toString()
+                        tvWeight.text = jedi.mass.toString()
+                    }
+```
+
+
 
 [`Anterior`](../Readme.md) | [`Siguiente`](../Reto-01)      
 
 </div>
-
