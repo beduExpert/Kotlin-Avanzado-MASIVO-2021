@@ -190,18 +190,6 @@ implementation 'com.google.code.gson:gson:2.8.6'
                 body?.let { Log.d("Response: ", it) }
 
                 try {
-
-                    val jedi = Gson().fromJson(body,Jedi::class.java)
-
-                    println(jedi.toString())
-
-                    runOnUiThread {
-                        binding. tvName.text = jedi.name
-                        binding.tvHeight.text = jedi.height.toString()
-                        binding.tvWeight.text = jedi.mass.toString()
-                    }
-
-                   /*val json = JSONObject(body)
                     val name = json.getString("name")
                     val height = json.getString("height")
                     val mass = json.getString("mass")
@@ -210,7 +198,7 @@ implementation 'com.google.code.gson:gson:2.8.6'
                         tvName.text = name
                         tvHeight.text = height
                         tvWeight.text = mass
-                    }*/
+                    }
 
                 } catch (e: JSONException) {
                     e.printStackTrace()
