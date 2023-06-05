@@ -30,32 +30,54 @@ El flujo debe ser el siguiente:
 <details>
 	<summary>Solucion</summary>
 1. En el archivo de Manifiesto, Reemplazar 
-
-
-```xml
-<activity android:name=".CameraActivity">
-```
-
-por
+Elimina la declaración del CameraActivity actual
 
 ```xml
 <activity android:name=".CameraActivity">
 ```
 
-2. copiar y pegar las funciones ***onRequestPermissionResult***, ***checkCameraPermission*** y ***requestPermissions*** en *CameraActivity*
+Y reemplaza la declaración de MainActivity por el de la cámara
 
-3. Escribir esta condicionante
+```xml
+<activity
+            android:name=".CameraActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+```
+
+2. Englobar el startCamera y el listener del botón en un método setupCamera:
+
+   ```kotlin
+    private fun setupCamera() {
+           lifecycleScope.launch {
+               startCamera()
+           }
+   
+           binding.captureButton.setOnClickListener {
+               takePhoto()
+           }
+       }
+   ```
+
+​	3. Escribir esta condicionante
 
 ```kotlin
 if(checkCameraPermission()){
-            startCamera()
+            setupCamera()
         } else{
             requestPermissions()
-            capture_button.setOnClickListener {
+            binding.captureButton.setOnClickListener {
                 requestPermissions()
             }
         }
 ```
+
+4. copiar y pegar las funciones ***onRequestPermissionResult***, ***checkCameraPermission*** y ***requestPermissions*** en *CameraActivity*.  Si el permiso es aceptado en onRequestPermissionResult, llamar a setupCamera().
 
 </details>
 

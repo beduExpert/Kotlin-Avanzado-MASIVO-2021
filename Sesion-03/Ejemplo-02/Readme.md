@@ -22,22 +22,14 @@ Vamos a aprender a cómo utilizar la cámara en una aplicación para tomar fotos
 1. en *app/build.gradle* vamos a instalar la dependencia de CameraX
 
 ```kotlin
-implementation "androidx.camera:camera-core:1.0.0-alpha06"
-    implementation "androidx.camera:camera-camera2:1.0.0-alpha06"
-```
-
-Al final del módulo *android*, hacer compatible con Java 1.8
-
-```kotlin
-android{
-...
-
-compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-}
+// recursos para la camara
+    implementation "androidx.camera:camera-core:1.2.3"
+    implementation "androidx.camera:camera-camera2:1.2.3"
+    implementation "androidx.camera:camera-lifecycle:1.2.3"
+    
+    // utilidades
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.1"
+    implementation "androidx.concurrent:concurrent-futures-ktx:1.1.0"
 ```
 
 2. Utilizamos los siguientes permisos en el *AndroidManifest.xml*
@@ -45,7 +37,7 @@ compileOptions {
 ```xml
 <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera" /> <!-- Puede ser camera.any para admitir dispositivos con únicamente cámara frontal -->
     <uses-feature android:name="android.hardware.camera.autofocus" />
 ```
 
@@ -77,13 +69,15 @@ y Registramos esta Activity (posteriormente la crearemos)
 ```kotlin
 class MainActivity : AppCompatActivity() {
 
-    val PERMISSION_ID = 34
+    private val PERMISSION_ID = 34
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        btnOpenCamera.setOnClickListener {
+        binding.btnOpenCamera.setOnClickListener {
             if(checkCameraPermission()){
                 openCamera()
             } else{
@@ -98,10 +92,14 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    @SuppressLint("MissingSuperCall")
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+
         if (requestCode == PERMISSION_ID) {
             if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                 openCamera()
+            } else {
+                Toast.makeText(this,"Aun requieres permiso", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -118,10 +116,7 @@ class MainActivity : AppCompatActivity() {
             PERMISSION_ID
         )
     }
-
-
 }
-
 ```
 
 5. Creamos el layout para nuestra Actividad de Cámara, estaa consta de un *TextureView* donde desplegaremos el Preview de la cámara, y el botón para hacer la captura:
@@ -132,11 +127,10 @@ class MainActivity : AppCompatActivity() {
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     >
-
-    <TextureView
+    <androidx.camera.view.PreviewView
         android:id="@+id/camera_preview"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -150,13 +144,14 @@ class MainActivity : AppCompatActivity() {
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_margin="24dp"
-        android:background="@color/colorPrimary"
+        android:background="@color/white"
         app:srcCompat="@android:drawable/ic_menu_camera"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 ```
 
@@ -165,109 +160,127 @@ class MainActivity : AppCompatActivity() {
 ```kotlin
 class CameraActivity : AppCompatActivity(){
 
-    private val executor = Executors.newSingleThreadExecutor()
+    private lateinit var binding: ActivityCameraBinding
+    private var imageCapture: ImageCapture? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_camera)
 
-        startCamera()
-    }
+        binding = ActivityCameraBinding.inflate(layoutInflater)
+
+        setContentView(binding.root)
 
 
-    fun startCamera(){
-
-        //Creamos la configuración para el preview de nuestra cámara
-        val previewConfig = PreviewConfig.Builder().apply {
-            setTargetResolution(Size(640, 480)) //ajustando resolucción
-        }.build()
-
-        //Creamos nuestro Preview
-        val preview = Preview(previewConfig)
-
-        // Cuando nuestro preview se actualice, recreamos nuestro layout
-        preview.setOnPreviewOutputUpdateListener {
-
-            // desatamos y volvemos a atar nuestro preview del TextureView
-            val parent =  camera_preview.parent as ViewGroup
-            parent.removeView(camera_preview)
-            parent.addView(camera_preview, 0)
-
-            camera_preview.surfaceTexture = it.surfaceTexture
-
+        lifecycleScope.launch {
+            startCamera()
         }
 
-        val imageCapture = captureConfig()
-
-        //Agregamos la función de Preview y de Captura de imagen al ciclo de vida de la cámara
-        CameraX.bindToLifecycle(this, preview,imageCapture)
+        binding.captureButton.setOnClickListener {
+            takePhoto()
+        }
     }
 
 
-    fun captureConfig(): ImageCapture{
-        // Creando el objeto para crear el caso de uso de captura de imagen
-        val imageCaptureConfig = ImageCaptureConfig.Builder()
-            .apply {
-                setCaptureMode(ImageCapture.CaptureMode.MIN_LATENCY)
-            }.build()
+    private suspend fun startCamera(){
 
-        // Creamos nuestro objeto de captura con su configuración
-        val imageCapture = ImageCapture(imageCaptureConfig)
+        val cameraProvider = ProcessCameraProvider.getInstance(this).await()
 
+        // Construimos el preview (aquí podemos hacer configuraciones)
+        val preview = Preview.Builder()
+            .build()
+            .also {
+                it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
+            }
 
-        //Capturar y guardar imagen cuando se de click al botón de captura
-        capture_button.setOnClickListener {
-            //Creando el archivo en la ruta
-            val file = File(externalMediaDirs.first(),
-                "${System.currentTimeMillis()}.jpg")
+        // Seleccionamos la cámara trasera
+        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
-            //Tomamos la afoto y asignamos el listener
-            imageCapture.takePicture(file, executor,
-                object : ImageCapture.OnImageSavedListener {
+        try {
+            // Atamos nuestra cámara al ciclo de vida de nuestro Activity
+            cameraProvider.run {
+                unbindAll()
+                imageCapture = ImageCapture.Builder().build()
+                bindToLifecycle(this@CameraActivity, cameraSelector, preview,  imageCapture)
+            }
 
-                    //Enviamos el error a log y a un Toast
-                    override fun onError(
-                        imageCaptureError: ImageCapture.ImageCaptureError,
-                        message: String,
-                        exc: Throwable?
-                    ) {
-                        val msg = "Photo capture failed: $message"
-                        Log.e("CameraXApp", msg, exc)
-                        camera_preview.post {
-                            Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-                        }
-                    }
+        } catch(exc: Exception) {
+            Toast.makeText(this, "No se pudo hacer bind al lifecycle", Toast.LENGTH_SHORT).show()
+        }
+    }
 
-                    //Mostramos un Toast y un log de imagen guardada
-                    override fun onImageSaved(file: File) {
-                        val msg = "¡Imagen guardada!: ${file.absolutePath}"
-                        Log.d("Camera", msg)
-                        camera_preview.post {
-                            Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                })
+    fun takePhoto() {
+        val format = SimpleDateFormat("dd-MM-yyyyy-HH:mm:ss:SSS", Locale.US)
+            .format(System.currentTimeMillis())
+        // Create time stamped name and MediaStore entry.
+        val name = "beduPhoto $format"
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraX-Image") // La carpeta donde se guarda
+            }
         }
 
-        return imageCapture
+        // Create output options object which contains file + metadata.
+        val outputOptions = ImageCapture.OutputFileOptions
+            .Builder(
+                contentResolver,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            .build()
+
+        // Set up image capture listener, which is triggered after photo has
+        // been taken.
+        imageCapture?.takePicture(
+            outputOptions,
+            ContextCompat.getMainExecutor(this),
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onError(e: ImageCaptureException) {
+                    Toast.makeText(
+                        baseContext,
+                        "Error al capturar imagen",
+                        Toast.LENGTH_SHORT).show()
+                    Log.e("CameraX",e.toString())
+                }
+
+                override fun onImageSaved(
+                    output: ImageCapture.OutputFileResults
+                ) {
+                    Toast.makeText(
+                        baseContext,
+                        "La imagen ${output.savedUri} se guardó correctamente!",
+                        Toast.LENGTH_SHORT).show()
+                    Log.d("CameraX", output.savedUri.toString())
+                }
+            }
+        )
     }
+}
+
 ```
 
 La aplicación debe verse así
 
-<img src="images/01.jpeg" width="33%"/>
+<img src="images/01.png" width="33%"/>
 
 Entrando a la cámara 
 
-<img src="images/02.jpeg" width="33%"/>
+<img src="images/02.png" width="33%"/>
 
 Foto tomada
 
-<img src="images/03.jpeg" width="33%"/>
+<img src="images/03.png" width="33%"/>
 
-Mostramos la ubicación de la foto con la app nativa ___File___  buscando en la ruta especificada en el _Toast___ (la imagen de abajo es la app *ES Explorador de archivos*).
+Podremos abrir la imagen desde la aplicación de google Photos. A continuación los datos!
 
-<img src="images/04.jpeg" width="33%"/>
+
+
+<img src="images/04.png" width="33%"/>
+
+
+
+Si buscamos la aplicación desde un explorador de archivos (como el de Google), tendremos algo similar a esto:
+
+<img src="images/05.png" width="33%"/>
 
 [`Anterior`](../Reto-01) | [`Siguiente`](../Reto-02)      
 
