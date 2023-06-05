@@ -20,7 +20,7 @@
 1. nstalamos la dependencia e localización de google play services:
 
 ```kotlin
-implementation 'com.google.android.gms:play-services-location:17.0.0'
+implementation 'com.google.android.gms:play-services-location:21.0.1'
 ```
 
 2. Necesitamos pedir permiso para usar la localización 
