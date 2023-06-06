@@ -209,10 +209,11 @@ class CameraActivity : AppCompatActivity(){
     }
 
     fun takePhoto() {
+        // Creamos un nombre único para cada foto
         val format = SimpleDateFormat("dd-MM-yyyyy-HH:mm:ss:SSS", Locale.US)
             .format(System.currentTimeMillis())
-        // Create time stamped name and MediaStore entry.
         val name = "beduPhoto $format"
+    
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
@@ -221,15 +222,14 @@ class CameraActivity : AppCompatActivity(){
             }
         }
 
-        // Create output options object which contains file + metadata.
+        // Creamos el builder para la configuración del archivo y los metadatos
         val outputOptions = ImageCapture.OutputFileOptions
             .Builder(
                 contentResolver,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
             .build()
 
-        // Set up image capture listener, which is triggered after photo has
-        // been taken.
+        // Seteamos el listener de cuando la captura sea efectuada
         imageCapture?.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(this),
