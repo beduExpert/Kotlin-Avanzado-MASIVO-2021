@@ -139,13 +139,9 @@ un método para consultar el status de algún permiso en la app, responde con bo
 un código para checar si la app tiene permisos de localización, responde con un Booleano
 
 ```kotlin
-private fun checkPermissions(): Boolean {
-        if ( checkGranted(Manifest.permission.ACCESS_COARSE_LOCATION) &&
-            checkGranted(Manifest.permission.ACCESS_COARSE_LOCATION) ){
-            return true
-        }
-        return false
-    }
+private fun checkPermissions() =
+        checkGranted(Manifest.permission.ACCESS_COARSE_LOCATION) &&
+        checkGranted(Manifest.permission.ACCESS_FINE_LOCATION)
 ```
 
 una función para pedir el permiso de localización por si aún no se lo otorgamos en la app
