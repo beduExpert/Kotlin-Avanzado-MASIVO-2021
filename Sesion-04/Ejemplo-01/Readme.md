@@ -104,16 +104,16 @@ el layout que elegimos es el siguiente:
 1. En el MainActivity, declaramos nuestras constantes: PREFS_NAME es el nombre de nuestra colección de preferencias, mientras que los otros tres son los keys en el key-pair
 
 ```kotlin
-val PREFS_NAME = "org.bedu.sharedpreferences"
-val STRING = "STRING"
-val NUMBER = "NUMBER"
-val BOOLEAN = "BOOLEAN"
+private val PREFS_NAME = "org.bedu.sharedpreferences"
+    private val STRING_KEY = "string_key"
+    private val NUMBER_KEY = "number_key"
+    private val BOOLEAN_KEY = "boolean_key"
 ```
 
 1. Declaramos también nuestra variable preferences, sin asignarle valor aún:
 
 ```kotlin
-lateinit var preferences: SharedPreferences
+private lateinit var preferences: SharedPreferences
 ```
 
 1. declaramos sharedPreferences
@@ -126,15 +126,16 @@ preferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) //Modo priv
 
 ```kotlin
 fun setValues(){
-        //obtenemos los valores desde preferencias
-        val string = preferences.getString(STRING,"")
-        val boolean = preferences.getBoolean(BOOLEAN, false)
-        val number = preferences.getFloat(NUMBER,0f)
+				val string = preferences.getString(STRING_KEY,"")
+        val boolean = preferences.getBoolean(BOOLEAN_KEY, false)
+        val number = preferences.getFloat(NUMBER_KEY,0f)
 
-        //los atamos a sus vistas
-        etString.setText(string)
-        switch1.isChecked = boolean
-        etNumber.setText(number.toString())
+        with (binding) {
+            //los atamos a sus vistas
+            etString.setText(string)
+            switch1.isChecked = boolean
+            etNumber.setText(number.toString())
+        }
     }
 ```
 
@@ -150,25 +151,105 @@ override fun onCreate(savedInstanceState: Bundle?) {
 1. declaramos el listener del botón guardar,
 
 ```kotlin
-button.setOnClickListener {
-            //obtenemos los valores de las vistas
-            val string = etString.text.toString()
-            val number = etNumber.text.toString().toFloat()
-            val checked = switch1.isChecked
+with (binding) {
+          button.setOnClickListener {
+                  // obtenemos los valores de las vistas
+                  val string = etString.text.toString()
+                  val number = etNumber.text.toString().toFloat()
+                  val checked = switch1.isChecked
 
-           //las asignamos a nuestra colección y aplicamos
-            preferences.edit()
-                .putString(STRING, string)
-                .putBoolean(BOOLEAN,checked)
-                .putFloat(NUMBER,number)
-                .apply()
-
+                    // las asignamos a nuestra colección y aplicamos
+                  preferences.edit()
+                      .putString(STRING_KEY, string)
+                        .putBoolean(BOOLEAN_KEY,checked)
+                        .putFloat(NUMBER_KEY,number)
+                        .apply()
+                }
         }
 ```
 
 Corremos el proyecto, debemos tener algo similar a esto:
 
 <img src="images/01.png" width="33%">
+
+
+
+#### Usando DataStore
+
+Para hacer una breve diferencia entre SharedPreferences, y la nueva versión de persistencia que nos proporciona jetpack, haremos el mismo ejercicio en un nuevo Activity. Para esto requeriremos seguir los siguientes pasos:
+
+1. Agregar estas dependencias  (DataStore y lifecycle).
+
+   ```groovy
+   implementation "androidx.datastore:datastore-preferences:1.0.0"
+   
+   implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.1"
+   ```
+
+2. Crear una nueva DataStoreActivity. Copiaremos el layout de MainActivity.
+
+3. En MainActivity, setear un long click listener para su botón que nos envíe a nuestra siguiente pantalla:
+
+   ```kotlin
+   setOnLongClickListener {
+       val intent = Intent(this@MainActivity, DataStoreActivity::class.java)
+       this@MainActivity.startActivity(intent)
+       true
+   }
+   ```
+
+4. Creamos nuestra instancia de DataStore afuera de nuestra clase DataStoreActivity:
+
+   ```kotlin
+   val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+   ```
+
+5. Dentro de la clase, seteamos las llaves para nuestro DataStore:
+
+   ```kotlin
+   private val STRING_KEY = stringPreferencesKey("string")
+   private val NUMBER_KEY = floatPreferencesKey("float")
+   private val BOOLEAN_KEY = booleanPreferencesKey("boolean")
+   ```
+
+6. Nos suscribimos a los eventos arrojados por nuestro DataStore, para ponerlos en la UI.
+
+   ```kotlin
+   lifecycleScope.launch{
+       repeatOnLifecycle(Lifecycle.State.CREATED) {
+           dataStore.data.collect {preferences ->
+               binding.etString.setText(preferences[STRING_KEY])
+               binding.switch1.isChecked = preferences[BOOLEAN_KEY] ?: false
+               binding.etNumber.setText(preferences[NUMBER_KEY].toString())
+           }
+       }
+   }
+   ```
+
+7. Finalmente, creamos nuestro código para editar los valores de DataStore cuando el botón de update es pulsado:
+
+   ```kotlin
+   with (binding) {
+       button.setOnClickListener {
+   
+           //obtenemos los valores de las vistas
+           val string = etString.text.toString()
+           val number = etNumber.text.toString().toFloat()
+           val checked = switch1.isChecked
+   
+           //las asignamos a nuestra colección y aplicamos
+           lifecycleScope.launch {
+               dataStore.edit { preferences ->
+                   preferences[STRING_KEY] = string
+                   preferences[NUMBER_KEY] = number
+                   preferences[BOOLEAN_KEY] = checked
+               }
+           }
+       }
+   }
+   ```
+
+La funcionalidad debería ser idéntica a la de SharedPreferences.
 
 [`Anterior`](../Readme.md) | [`Siguiente`](../Reto-01)      
 

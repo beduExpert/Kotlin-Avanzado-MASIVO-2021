@@ -25,7 +25,7 @@ Aplicar SharedPreferences a través de un ejemplo
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/gray"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -76,6 +76,12 @@ Aplicar SharedPreferences a través de un ejemplo
         app:layout_constraintTop_toBottomOf="@+id/etPass" />
 </androidx.constraintlayout.widget.ConstraintLayout>
 ```
+
+2. Agrega el color gray a colors.xml:
+
+   ```xml
+   <color name="gray">#333333</color>
+   ```
 
 2. Guardamos el archivo adjunto ***bedu.png*** en la carpeta drawable, dentro de res. 
 
