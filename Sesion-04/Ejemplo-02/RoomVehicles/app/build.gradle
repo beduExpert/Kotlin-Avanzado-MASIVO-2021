@@ -8,6 +8,10 @@ android {
     namespace 'org.bedu.roomvehicles'
     compileSdk 33
 
+    viewBinding {
+        enabled true
+    }
+
     defaultConfig {
         applicationId "org.bedu.roomvehicles"
         minSdk 24

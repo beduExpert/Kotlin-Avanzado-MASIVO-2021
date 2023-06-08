@@ -6,26 +6,26 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(entities = [Vehicle::class], version = 1)
-abstract class BeduDb : RoomDatabase(){
+abstract class VehicleDb : RoomDatabase(){
 
     abstract fun vehicleDao(): VehicleDao
 
     companion object {
         @Volatile
-        private var beduInstance: BeduDb? = null
+        private var dbInstance: VehicleDb? = null
 
-        const val DB_NAME = "Bedu_DB"
+        private const val DB_NAME = "vehicle_db"
 
-        fun getInstance(context: Context) : BeduDb {
+        fun getInstance(context: Context) : VehicleDb {
 
-            return beduInstance?: synchronized(this) {
+            return dbInstance?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
-                    BeduDb::class.java,
+                    VehicleDb::class.java,
                     DB_NAME
                 ).build()
-                beduInstance = instance
-                // return instance
+                dbInstance = instance
+
                 instance
             }
         }

@@ -43,7 +43,6 @@ class MainActivity : AppCompatActivity() {
                         .putBoolean(BOOLEAN_KEY,checked)
                         .putFloat(NUMBER_KEY,number)
                         .apply()
-
                 }
 
                 setOnLongClickListener {

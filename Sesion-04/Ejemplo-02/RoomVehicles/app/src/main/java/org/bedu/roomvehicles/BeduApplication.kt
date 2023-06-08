@@ -1,9 +1,11 @@
 package org.bedu.roomvehicles
 
 import android.app.Application
-import org.bedu.roomvehicles.room.BeduDb
+import org.bedu.roomvehicles.room.VehicleDb
 import org.bedu.roomvehicles.room.VehicleDao
 
 class BeduApplication: Application() {
-    val database by lazy {BeduDb.getInstance(this)}
+    private val database by lazy {VehicleDb.getInstance(this)}
+    val vehicleDao
+        get() = database.vehicleDao()
 }

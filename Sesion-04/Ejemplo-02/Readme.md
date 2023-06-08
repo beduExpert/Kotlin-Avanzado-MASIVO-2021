@@ -167,7 +167,7 @@ Crearemos una clase abstracta que herede de ___RoomDatabase___.
 
 ```kotlin
 @Database(entities = [Vehicle::class], version = 1)
-abstract class BeduDb : RoomDatabase(){
+abstract class VehicleDb : RoomDatabase(){
   
     abstract fun vehicleDao(): VehicleDao
 
@@ -196,52 +196,61 @@ Dentro de nuestra clase, crearemos un método estático implementando el patrón
 
 
 ```kotlin
- companion object {
+companion object {
         @Volatile
-        private var beduInstance: BeduDb? = null
+        private var dbInstance: VehicleDb? = null
 
-        const val DB_NAME = "Bedu_DB"
+        private const val DB_NAME = "vehicle_db"
 
-        fun getInstance(context: Context) : BeduDb {
+        fun getInstance(context: Context) : VehicleDb {
 
-            return beduInstance?: synchronized(this) {
+            return dbInstance?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
-                    BeduDb::class.java,
+                    VehicleDb::class.java,
                     DB_NAME
                 ).build()
-                beduInstance = instance
-                // return instance
+                dbInstance = instance
+
                 instance
             }
         }
     }
 ```
 
+Para crear una solo instancia, podemos hacerlo desde ___BeduApplication___. Esto garantizará que la instancia viva por todo el ciclo de vida de la aplicación.
 
+```kotlin
+class BeduApplication: Application() {
+    private val database by lazy {VehicleDb.getInstance(this)}
+    val vehicleDao
+        get() = database.vehicleDao()
+}
+```
+
+Y con esto, podemos setear una variable ___vehicleDao___ en cada uno de nuestros fragments:
+
+```kotlin
+private val vehicleDao by lazy {
+    (requireActivity().application as BeduApplication).vehicleDao }
+```
 
 #### Enlistando nuestros vehículos
 
-Ahora utilizaremos nuestros elementos en una lista de vehículos. Para eso abriremos ___VehicleListFragment___ y en algún punto de ___onCreateView___, crearemos un executor,que gestionará una tarea que corre en un hilo, estopara evitar que las queries a las bases de datos bloqueen el ___Main Thread___. ___NOTA:___ Evitaremos el uso de ___AsyncTask___ debido a que está obsoleto desde la API 30 (Android 11). 
-
-
+Ahora utilizaremos nuestros elementos en una lista de vehículos. Para eso abriremos ___VehicleListFragment___ y en el método __populateList()__, crearemos un executor,que gestionará una tarea que corre en un hilo, estopara evitar que las queries a las bases de datos bloqueen el ___Main Thread___. ___NOTA:___ Evitaremos el uso de ___AsyncTask___ debido a que está obsoleto desde la API 30 (Android 11). 
 
 ```kotlin
  val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
-        executor.execute(Runnable {
+        executor.execute {
 
-            val vehicleArray = BeduDb
-                .getInstance(context = requireContext())
-                ?.vehicleDao()
-                ?.getVehicles() as MutableList<Vehicle>
+            val vehicleArray = vehicleDao.getVehicles() as MutableList<Vehicle>
 
-
-            Handler(Looper.getMainLooper()).post(Runnable {
+            Handler(Looper.getMainLooper()).post {
                 adapter = VehicleAdapter(vehicleArray, getListener())
                 recyclerVehicle.adapter = adapter
-            })
-        })
+            }
+        }
 ```
 
 
@@ -252,23 +261,23 @@ Dentro del método execute de nuestro executor encontramos una instancia de nues
 
 #### Agregando un nuevo vehículo
 
-Ahora abriremos ___AddEditFragment___, y dentro de ___onCreateView___  pondremos el código que nos permitirá agregar un nuevo elemento a nuestra tabla. Colocaremos un click listener para nuestro botón ___Agregar___ y ahí colocaremos el código. En esta ocasión no evaluaremos nada. El layout es el siguiente:
+Ahora abriremos ___AddEditFragment___, y dentro del método ___addVehicle___  pondremos el código que nos permitirá agregar un nuevo elemento a nuestra tabla. Colocaremos un click listener para nuestro botón ___Agregar___ y ahí colocaremos el código. En esta ocasión no evaluaremos nada. El layout es el siguiente:
 
 <img src="images/AddEdit.png" width="35%">
 
 La implementación comienza por crear un nuevo objeto vehículo con los datos de los campos.
 
 ```kotlin
-addButton.setOnClickListener{
-            val vehicle = Vehicle(
-                    brand = brandEdit.text.toString(),
-                    platesNumber = platesEdit.text.toString(),
-                    model = modelEdit.text.toString(),
-                    isWorking = workingSwitch.isEnabled
-            )
-  
+private fun addVehicle() {
+        val vehicle = Vehicle(
+            brand = binding.editBrand.text.toString(),
+            platesNumber = binding.editPlates.text.toString(),
+            model = binding.editModel.text.toString(),
+            isWorking = binding.switchWorking.isEnabled
+        )
 
         ...
+    }
 ```
 
 
@@ -278,18 +287,18 @@ Este objeto debe ser la entrada de nuestro método ___insertVehicle___ definido 
 ```kotlin
 val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
-executor.execute(Runnable {
+executor.execute {
   BeduDb
   .getInstance(context = requireContext())
   ?.vehicleDao()
   ?.insertVehicle(vehicle)
 
-  Handler(Looper.getMainLooper()).post(Runnable {
+  Handler(Looper.getMainLooper()).post {
     findNavController().navigate(
       R.id.action_addEditFragment_to_vehicleListFragment
     )
-  })
-})
+  }
+}
 ```
 
 Nótese que la acción a ejecutar posterior a la tarea del hilo es redirigirse a la lista de vehículos (aquí hay un pequeño truco, debido que la navegación remueve el _Fragment_ de lista previo y reemplaza por uno nuevo, permitiendo tener una lista actualizada).
@@ -300,23 +309,75 @@ Recreamos el flujo y comprobamos que nuestro nuevo elemento se encuentre en la l
 
 
 
+#### Utilizando coroutines
+
+Previamente vimos la implementación con un executor, sin embargo, Room es tan flexible que podemos usarlo con distintos frameworks de programación asíncrona. Para utilizar un coroutine, hace falta únicamente un par de ajustes al código que teníamos previamente.
+
+Primero, agrega el prefijo suspend a cada método del Dao que creamos.
+
+```kotlin
+@Dao
+interface VehicleDao {
+
+    @Insert
+    suspend fun insertVehicle(vehicle: Vehicle)
+    
+    @Update
+    suspend fun updateVehicle(vehicle: Vehicle)
+    
+  ...
+}
+```
+
+
+
+Ahora, reemplazaremos el código del método ___populateList()___ por el siguiente:
+
+```kotlin
+lifecycleScope.launch {
+    val vehicleArray = withContext(Dispatchers.IO) {
+       return@withContext vehicleDao.getReducedVehicles() as MutableList<ReducedVehicle>
+    }
+    adapter = VehicleAdapter(vehicleArray, this@VehicleListFragment)
+    binding.list.adapter = adapter
+}
+```
+
+De igual forma, reemplazamos el anterior código de nuestro método ___addVehicle___ por el siguiente:
+
+```kotlin
+val vehicle = Vehicle(
+    brand = binding.editBrand.text.toString(),
+    platesNumber = binding.editPlates.text.toString(),
+    model = binding.editModel.text.toString(),
+    isWorking = binding.switchWorking.isEnabled
+)
+
+lifecycleScope.launch {
+    withContext(Dispatchers.IO) {
+        vehicleDao.insertVehicle(vehicle)
+    }
+    findNavController().navigate(
+        R.id.action_addEditFragment_to_vehicleListFragment
+    )
+}
+```
+
+Comprobarás al correr la aplicación que el código sigue funcionando sin ningún problema!
+
 #### Eliminando un elemento de la lista
 
 Ahora eliminaremos un elemento, para esto ya hay dos métodos en nuestro ___VehicleListFragment___ provenientes de una interfaz, uno de ellos es ___onDelete()___ y recibe como parámetro un vehículo, que en este caso será el elemento a eliminar:
 
 ```kotlin
-   executor.execute(Runnable {
+  lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                vehicleDao.removeVehicleById(vehicle.id)
+            }
 
-            BeduDb
-                .getInstance(context = requireContext())
-                .vehicleDao()
-                .removeVehicleById(vehicle.id)
-
-            Handler(Looper.getMainLooper()).post(Runnable {
-                adapter.removeItem(vehicle)
-                Toast.makeText(context,"Elemento eliminado!",Toast.LENGTH_SHORT).show()
-            })
-        })
+            adapter.removeItem(vehicle)
+            Toast.makeText(context, "Elemento eliminado!", Toast.LENGTH_SHORT).show()
+        }
 ```
 
 
@@ -337,7 +398,7 @@ Crearemos un nuevo método en el DAO que nos de una lista filtrada de vehículos
 
 ```kotlin
     @Query("SELECT * FROM Vehicle WHERE plates_number = :platesNumber")
-    fun getVehicleByPlates(platesNumber: String) : Vehicle
+    suspend fun getVehicleByPlates(platesNumber: String) : Vehicle
 ```
 
 
@@ -345,10 +406,7 @@ Crearemos un nuevo método en el DAO que nos de una lista filtrada de vehículos
 Ahora vamos a reemplazar el método ___getVehicles()___ por ___getVehiclesByBrand()___ en el _onCreateView_ de ___VehicleListFragment___.
 
 ```kotlin
-val vehicleArray = BeduDb
-                .getInstance(context = requireContext())
-                ?.vehicleDao()
-                ?.getVehiclesByBrand("Volkswagen")
+return@withContext vehicleDao.getReducedVehicles("Volkswagen") as MutableList<ReducedVehicle>
 ```
 
 Y observamos el resultado.
@@ -393,16 +451,13 @@ data class ReducedVehicle(
 
 ```kotlin
 @Query("SELECT id,model,plates_number as platesNumber FROM Vehicle")
-    fun getReducedVehicles(): List<ReducedVehicle>
+suspend fun getReducedVehicles(): List<ReducedVehicle>
 ```
 
   Ahora reemplazamos el método actual para obtener ahora la versión reducida de vehículos. 
 
 ```kotlin
-val vehicleArray = BeduDb
-                .getInstance(context = requireContext())
-                ?.vehicleDao()
-                ?.getReducedVehicles() as MutableList<ReducedVehicle>
+return@withContext vehicleDao.getReducedVehicles() as MutableList<ReducedVehicle>
 ```
 
 Esto implicará cambios de clases en otras instancias en nuestro ___VehicleListFragment___, ___VehicleAdapter___ e ___ItemListener___. Después de realizarlos, imprimimos la nueva lista en el log y verifiquemos que ahora solo salgan los datos demandados. El flujo debería funcionar de la misma forma.
