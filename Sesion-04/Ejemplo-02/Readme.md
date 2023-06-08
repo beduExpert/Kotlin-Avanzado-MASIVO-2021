@@ -319,8 +319,6 @@ Ahora eliminaremos un elemento, para esto ya hay dos métodos en nuestro ___Vehi
         })
 ```
 
-Vemos que ahora utilizamos una coroutine para eliminar vehículos. Room es flexible con varias librerías asíncronas!
-
 
 
 Al eliminar un objeto, veremos el siguiente comportamiento:
