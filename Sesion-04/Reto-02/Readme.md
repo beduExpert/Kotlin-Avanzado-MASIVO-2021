@@ -36,6 +36,6 @@ El siguiente gif muestra como se debe interactuar al agregar y al editar un elem
 
 <img src="images/edit.gif" width="35%">
 
-[`Anterior`](../Ejemplo-02) | [`Siguiente`](../Ejemplo-03/Readme.md)      
+[`Anterior`](../Ejemplo-02) | [`Siguiente`](../Proyecto/Readme.md)      
 
 </div>

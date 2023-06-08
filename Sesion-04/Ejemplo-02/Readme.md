@@ -70,8 +70,11 @@ Utilizaremos un [directorio base](base) del proyecto para evitar desarrollar cie
 Requeriremos escencialmente dos dependencias en ___build.gradle___:
 
 ```kotlin
-implementation 'androidx.room:room-runtime:2.2.5'
-kapt 'androidx.room:room-compiler:2.2.5'
+def room_version = "2.5.1"
+
+implementation "androidx.room:room-runtime:$room_version"
+implementation "androidx.room:room-ktx:$room_version"
+kapt "androidx.room:room-compiler:$room_version"
 ```
 
 en el mismo archivo, activamos el plugin ___kapt___
@@ -132,7 +135,7 @@ interface VehicleDao {
     fun removeVehicle(vehicle: Vehicle)
 
     @Query("DELETE FROM Vehicle WHERE id=:id")
-    fun removeVehicleById(id: Int)
+		fun removeVehicleById(id: Int)
 
     @Delete
     fun removeVehicles(vararg vehicles: Vehicle)
@@ -163,7 +166,7 @@ Requerimos una representación de la base de datos para obtener acceso a ella y 
 Crearemos una clase abstracta que herede de ___RoomDatabase___.
 
 ```kotlin
-@Database(entities = arrayOf(Vehicle::class), version = 1)
+@Database(entities = [Vehicle::class], version = 1)
 abstract class BeduDb : RoomDatabase(){
   
     abstract fun vehicleDao(): VehicleDao
@@ -193,27 +196,26 @@ Dentro de nuestra clase, crearemos un método estático implementando el patrón
 
 
 ```kotlin
-companion object {
-  private var beduInstance: BeduDb? = null
+ companion object {
+        @Volatile
+        private var beduInstance: BeduDb? = null
 
-  const val DB_NAME = "Bedu_DB"
+        const val DB_NAME = "Bedu_DB"
 
-  fun getInstance(context: Context) : BeduDb?{
-    if(beduInstance==null){
+        fun getInstance(context: Context) : BeduDb {
 
-      synchronized(BeduDb::class){
-        beduInstance = Room.databaseBuilder(
-          context.applicationContext,
-          BeduDb::class.java,
-          DB_NAME)
-        .fallbackToDestructiveMigration() // al cambiar de version, destruir info en vez de migrar
-        .build()
-      }
+            return beduInstance?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    BeduDb::class.java,
+                    DB_NAME
+                ).build()
+                beduInstance = instance
+                // return instance
+                instance
+            }
+        }
     }
-
-    return beduInstance
-  }
-}
 ```
 
 
@@ -277,17 +279,17 @@ Este objeto debe ser la entrada de nuestro método ___insertVehicle___ definido 
 val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
 executor.execute(Runnable {
-  BeduDb
-  .getInstance(context = requireContext())
-  ?.vehicleDao()
-  ?.insertVehicle(vehicle)
 
-  Handler(Looper.getMainLooper()).post(Runnable {
-    findNavController().navigate(
-      R.id.action_addEditFragment_to_vehicleListFragment
-    )
-  })
-})
+            BeduDb
+                .getInstance(context = requireContext())
+                .vehicleDao()
+                .removeVehicleById(vehicle.id)
+
+            Handler(Looper.getMainLooper()).post(Runnable {
+                adapter.removeItem(vehicle)
+                Toast.makeText(context,"Elemento eliminado!",Toast.LENGTH_SHORT).show()
+            })
+        })
 ```
 
 Nótese que la acción a ejecutar posterior a la tarea del hilo es redirigirse a la lista de vehículos (aquí hay un pequeño truco, debido que la navegación remueve el _Fragment_ de lista previo y reemplaza por uno nuevo, permitiendo tener una lista actualizada).
@@ -303,22 +305,18 @@ Recreamos el flujo y comprobamos que nuestro nuevo elemento se encuentre en la l
 Ahora eliminaremos un elemento, para esto ya hay dos métodos en nuestro ___VehicleListFragment___ provenientes de una interfaz, uno de ellos es ___onDelete()___ y recibe como parámetro un vehículo, que en este caso será el elemento a eliminar:
 
 ```kotlin
-    override fun onDelete(vehicle: Vehicle) {
-        Executors
-            .newSingleThreadExecutor()
-            .execute(Runnable {
-                BeduDb
-                    .getInstance(context = requireContext())
-                    ?.vehicleDao()
-                    ?.removeVehicleById(vehicle.id)
-
-                Handler(Looper.getMainLooper()).post(Runnable {
-                    adapter.removeItem(vehicle)
-                    Toast.makeText(context,"Elemento eliminado!",Toast.LENGTH_SHORT).show()
-                })
-            })
-    }
+    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO){
+             BeduDb
+                 .getInstance(context = requireContext())
+                 .vehicleDao()
+                 .removeVehicleById(vehicle.id)
+             
+            adapter.removeItem(vehicle)
+            Toast.makeText(context,"Elemento eliminado!",Toast.LENGTH_SHORT).show()
+        }
 ```
+
+Vemos que ahora utilizamos una coroutine para eliminar vehículos. Room es flexible con varias librerías asíncronas!
 
 
 

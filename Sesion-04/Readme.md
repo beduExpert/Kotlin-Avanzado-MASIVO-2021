@@ -54,17 +54,6 @@ Esta es una guía anexa de consejos para una mejor planeación de tu proyecto pa
 
 - [**`POSTWORK SESIÓN 4`**](Postwork/Readme.md)
 
-
-
-### 5. Temas adicionales  :open_book:
-
-<ins>Aplicación de Realm</ins>
-
-Utilizaremos la librería 3rd party ___Realm___ y gestionaremos mediante esta ORM una base de datos.
-
-- [**`EJEMPLO 3`**](Ejemplo-03/Readme.md)
-- [**`RETO 3`**](Reto-03/Readme.md)
-
 <br/>
 
 [`Anterior`](../Sesion-03/Readme.md) | [`Siguiente`](../Sesion-05/Readme.md)      

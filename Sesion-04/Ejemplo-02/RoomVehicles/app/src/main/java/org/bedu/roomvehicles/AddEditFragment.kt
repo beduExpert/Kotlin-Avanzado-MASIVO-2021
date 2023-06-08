@@ -11,7 +11,6 @@ import android.widget.EditText
 import android.widget.Switch
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import org.bedu.roomvehicles.room.BeduDb
 import org.bedu.roomvehicles.room.Vehicle
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -25,6 +24,8 @@ class AddEditFragment : Fragment() {
     private lateinit var modelEdit: EditText
     private lateinit var workingSwitch: Switch
     private lateinit var addButton: Button
+
+    private val db by lazy {(requireActivity().application as BeduApplication).database}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,10 +58,7 @@ class AddEditFragment : Fragment() {
             val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
             executor.execute(Runnable {
-                BeduDb
-                        .getInstance(context = requireContext())
-                        ?.vehicleDao()
-                        ?.insertVehicle(vehicle)
+                db.vehicleDao().insertVehicle(vehicle)
 
                 Handler(Looper.getMainLooper()).post(Runnable {
                     findNavController().navigate(
