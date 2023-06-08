@@ -1,11 +1,11 @@
 package org.bedu.roomvehicles.room
 
-import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+//@Entity
 @Entity(indices = [Index(value = ["plates_number"], unique = true)])
 data class Vehicle(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,

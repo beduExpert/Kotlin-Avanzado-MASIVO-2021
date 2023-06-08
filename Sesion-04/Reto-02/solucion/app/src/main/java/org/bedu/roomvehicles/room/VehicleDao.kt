@@ -6,30 +6,30 @@ import androidx.room.*
 interface VehicleDao {
 
     @Insert
-    fun insertVehicle(vehicle: Vehicle)
+    suspend fun insertVehicle(vehicle: Vehicle)
 
     @Update
-    fun updateVehicle(vehicle: Vehicle)
+    suspend fun updateVehicle(vehicle: Vehicle)
 
     @Delete
     fun removeVehicle(vehicle: Vehicle)
 
     @Query("DELETE FROM Vehicle WHERE id=:id")
-    fun removeVehicleById(id: Int)
+    suspend fun removeVehicleById(id: Int)
 
     @Delete
-    fun removeVehicles(vararg vehicles: Vehicle)
+    suspend fun removeVehicles(vararg vehicles: Vehicle)
 
     @Query("SELECT * FROM Vehicle")
-    fun getVehicles(): List<Vehicle>
+    suspend fun getVehicles(): List<Vehicle>
 
     @Query("SELECT id,model,plates_number as platesNumber FROM Vehicle")
-    fun getReducedVehicles(): List<ReducedVehicle>
+    suspend fun getReducedVehicles(): List<ReducedVehicle>
 
 
     @Query("SELECT * FROM Vehicle WHERE id = :id")
-    fun getVehicleById(id: Int): Vehicle
+    suspend fun getVehicleById(id: Int): Vehicle
 
     @Query("SELECT * FROM Vehicle WHERE plates_number = :platesNumber")
-    fun getVehicleByPlates(platesNumber: String) : Vehicle
+    suspend fun getVehicleByPlates(platesNumber: String) : Vehicle
 }
