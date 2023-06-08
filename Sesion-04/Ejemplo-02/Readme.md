@@ -279,17 +279,17 @@ Este objeto debe ser la entrada de nuestro método ___insertVehicle___ definido 
 val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
 executor.execute(Runnable {
+  BeduDb
+  .getInstance(context = requireContext())
+  ?.vehicleDao()
+  ?.insertVehicle(vehicle)
 
-            BeduDb
-                .getInstance(context = requireContext())
-                .vehicleDao()
-                .removeVehicleById(vehicle.id)
-
-            Handler(Looper.getMainLooper()).post(Runnable {
-                adapter.removeItem(vehicle)
-                Toast.makeText(context,"Elemento eliminado!",Toast.LENGTH_SHORT).show()
-            })
-        })
+  Handler(Looper.getMainLooper()).post(Runnable {
+    findNavController().navigate(
+      R.id.action_addEditFragment_to_vehicleListFragment
+    )
+  })
+})
 ```
 
 Nótese que la acción a ejecutar posterior a la tarea del hilo es redirigirse a la lista de vehículos (aquí hay un pequeño truco, debido que la navegación remueve el _Fragment_ de lista previo y reemplaza por uno nuevo, permitiendo tener una lista actualizada).
@@ -305,15 +305,18 @@ Recreamos el flujo y comprobamos que nuestro nuevo elemento se encuentre en la l
 Ahora eliminaremos un elemento, para esto ya hay dos métodos en nuestro ___VehicleListFragment___ provenientes de una interfaz, uno de ellos es ___onDelete()___ y recibe como parámetro un vehículo, que en este caso será el elemento a eliminar:
 
 ```kotlin
-    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO){
-             BeduDb
-                 .getInstance(context = requireContext())
-                 .vehicleDao()
-                 .removeVehicleById(vehicle.id)
-             
-            adapter.removeItem(vehicle)
-            Toast.makeText(context,"Elemento eliminado!",Toast.LENGTH_SHORT).show()
-        }
+   executor.execute(Runnable {
+
+            BeduDb
+                .getInstance(context = requireContext())
+                .vehicleDao()
+                .removeVehicleById(vehicle.id)
+
+            Handler(Looper.getMainLooper()).post(Runnable {
+                adapter.removeItem(vehicle)
+                Toast.makeText(context,"Elemento eliminado!",Toast.LENGTH_SHORT).show()
+            })
+        })
 ```
 
 Vemos que ahora utilizamos una coroutine para eliminar vehículos. Room es flexible con varias librerías asíncronas!
