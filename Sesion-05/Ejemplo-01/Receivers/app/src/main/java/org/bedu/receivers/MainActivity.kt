@@ -6,28 +6,28 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import org.bedu.receivers.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
 
 
-    private lateinit var button: Button
+    private lateinit var binding: ActivityMainBinding
     private val receiverOne = ReceiverOne()
     private val receiverTwo = ReceiverTwo()
     private val airplaneReceiver = AirplaneReceiver()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Registramos el receiver de modo avión
         IntentFilter().apply {
             addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED)
         }.also { filter -> registerReceiver(airplaneReceiver,filter) }
 
-        button = findViewById(R.id.button)
-
-        button.setOnClickListener {
+        binding.button.setOnClickListener {
 
             val bundle = Bundle().apply {
                 putString("NAME","Pedro")

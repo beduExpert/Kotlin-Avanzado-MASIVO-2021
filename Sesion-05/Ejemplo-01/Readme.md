@@ -1,4 +1,4 @@
-[`Kotlin Avanzado`](../../Readme.md) > [`Sesión 04`](../Readme.md) > `Ejemplo 1` 
+[`Kotlin Avanzado`](../../Readme.md) > [`Sesión 05`](../Readme.md) > `Ejemplo 1` 
 
 ## Ejemplo 1: Broadcast Receivers
 
@@ -119,7 +119,7 @@ Si lo requieres, puedes dar un repaso al tema de ___Scope Functions___ en la [do
 
 ### Broadcast implícito
 
-___Nota: ___ para este punto específico, debemos apuntar a una versión anterior a la API 26, debido que desde esta versión solo podemos atender broadcasts implícitos si este se registra de forma dinámica ( abordaremos en seguida este tema).
+___Nota:___ para este punto específico, debemos apuntar a una versión anterior a la API 26, debido que desde esta versión solo podemos atender broadcasts implícitos si este se registra de forma dinámica ( abordaremos en seguida este tema).
 
 Ahora, en vez de elegir directamente el receiver que va a escuchar nuestra emisión, vamos a lanzar al aire nuestra emisión, pero utilizaremos una clave para que quien quiera recibirla, pueda identificarla. Recuerdas el intent filter de nuestro manifest? ahí declaramos una acción :
 
@@ -222,77 +222,43 @@ Thread: ${Thread.currentThread()}
 
 > Thread[main,5,main]
 
-Lo cual significa que estamos en el _Main Thread_, por lo que el sistema puede terminar el proceso si considera necesario liberar memoria. Para evitar esto, podemos correr nuestro proceso en segundo plano mediante una coroutine. Haremos uso del paquete ViewModel para facilitar ciertos manejos del job en el ciclo de vida.
-
-Creamos una clase que va a realizar la tarea asíncrone, esta heredará de ___ViewModel___, y recibirá el bundle para extraer los datos, y el context para mostrar nuestro Toast.
+Lo cual significa que estamos en el _Main Thread_, por lo que el sistema puede terminar el proceso si considera necesario liberar memoria. Para evitar esto, podemos correr nuestro proceso en segundo plano mediante una coroutine. 
 
 ```kotlin
-  private inner class ToastCoroutine(
-        private val bundle: Bundle?,
-        private val context: Context) : ViewModel() {
-    
-  }
+CoroutineScope(Dispatchers.IO).launch {
+}
 ```
 
-
-
-Dentro de ella crearemos una función execute() que ejecutará nuestra tarea, aquí ejecutaremos el método ___doInBackground___ que correrá el proceso en un _Thread_ separado del main, y ___onPostExecute___ que correrá en el _Main Thread_ para poder renderizar nuestro _Toast_.
+Dentro del Coroutine, recuperamos la información en el bundle y simulamos un proceso mediante un delay.
 
 ```kotlin
-  fun execute() = viewModelScope.launch {
-            doInBackground()
-            onPostExecute()
-        }
-```
-
-En ___doInBackground___ imprimimos el nombre y email recibido, junto con el thread en el que se esta corriendo. Hacemos un delay(1000) para probar que estamos suspendiendo la corrutina exitosamente. Debido a que solamente en el Hilo principal puedo interactuar con la UI, no es posible renderizar el _Toast_ aquí.
-
-```kotlin
-private suspend fun doInBackground(): String = withContext(Dispatchers.IO) {
-            val name = bundle?.getString("NAME")
-            val email = bundle?.getString("EMAIL")
-
-            Log.d("Broadcast",
-                """NAME: $name
-                EMAIL: $email
-                Thread: ${Thread.currentThread()}
-            """.trimMargin())
-            delay(3000) // simulate async work
-            return@withContext "Resultado"
-        }
-```
-
-
-
-en ___onPostExecute___ es donde mostramos el _Toast_.
-
-```kotlin
-private fun onPostExecute(){
+val bundle = intent.extras
     val name = bundle?.getString("NAME")
     val email = bundle?.getString("EMAIL")
-    Toast.makeText(context,"$name $email",Toast.LENGTH_SHORT).show()
 
-    Log.d("Broadcast", " Thread de post execute: ${Thread.currentThread()}")
-}
+    Log.d("Broadcast",
+        """NAME: $name
+    EMAIL: $email
+    Thread: ${Thread.currentThread()}
+""".trimMargin())
+
+    delay(1000)
 ```
 
-
-
-Finalmente, el _onReceive_ ___ReceiverTwo___ debe lucir así:
+Después de esto, vamos a ejecutar un _Toast_ en el hilo principal con los datos recuperados:
 
 ```kotlin
-ToastCoroutine(intent.extras,context).run {
-    execute()
+withContext(Dispatchers.Main) {
+    Toast.makeText(context,"$name $email",Toast.LENGTH_SHORT).show()
+    Log.d("Broadcast", " Thread en Dispatchers.Main: ${Thread.currentThread()}")
 }
 ```
 
-
-
-De esta forma comprobamos que al correr ___doInBackground___ obtenemos el siguiente _Thread_:
+De esta forma comprobamos que al correr el evento en IO, obtenemos el siguiente _Thread_:
 
 > Thread: Thread[DefaultDispatcher-worker-1,5,main]
 
-Mientras que en ___onPostExecute___ se muestra el hilo principal:
+Mientras que usando el  ___Dispatchers.Main___ se muestra el hilo principal:
 
 > Thread: Thread[main,5,main]
 
@@ -366,8 +332,6 @@ mientras que para ___onPostExecute___ sería el siguiente:
 #### Recibiendo señales del sistema
 
 Ya escuchamos emisiones desde la propia aplicación, pero el sistema operativo también puede arrojar varias emisiones correspondientes a eventos que suceden en el sistema, algunos de esto son:
-
-
 
 * __ACTION_DATE_CHANGED__ (al cambiar la fecha del sistema)
 * ___DATA_SMS_RECEIVED_ACTION___ (Al recibir un SMS)

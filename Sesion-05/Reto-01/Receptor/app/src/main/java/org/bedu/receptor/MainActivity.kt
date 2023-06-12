@@ -6,8 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
-import android.widget.Toast
+import android.util.Log
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,14 +29,14 @@ class MainActivity : AppCompatActivity() {
             val version = bundle?.getString("APP_VERSION")
             val credit = bundle?.getInt("CREDIT")
 
-            Toast.makeText(context,"""
+            Log.d("Receiver",
+                """
                 Name: $name
                 Is user: $isUser
                 app version: $version
                 current credit: $credit
-            """.trimIndent(),
-            Toast.LENGTH_SHORT).show()
-
+            """.trimIndent()
+            )
         }
 
     }

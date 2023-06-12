@@ -5,10 +5,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import org.bedu.roomvehicles.room.Vehicle.Companion.TABLE_NAME
 
 //@Entity
-@Entity(tableName = TABLE_NAME,indices = [Index(value = ["plates_number"], unique = true)])
+@Entity(tableName = Vehicle.TABLE_NAME, indices = [Index(value = ["plates_number"], unique = true)])
 data class Vehicle(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(index = true,name = COLUMN_PK) val id: Int = 0,
@@ -16,7 +15,7 @@ data class Vehicle(
     @ColumnInfo(name = COLUMN_BRAND) val brand: String?,
     @ColumnInfo(name = COLUMN_PLATES) val platesNumber: String?,
     @ColumnInfo(name= COLUMN_WORKING) val isWorking: Boolean = true
-){
+) {
     companion object{
         const val TABLE_NAME = "vehicles"
         const val COLUMN_PK = BaseColumns._ID

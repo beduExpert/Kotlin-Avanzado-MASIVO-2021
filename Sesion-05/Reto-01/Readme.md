@@ -1,4 +1,4 @@
-[`Kotlin Avanzado`](../../Readme.md) > [`Sesión 04`](../Readme.md) > `Reto 1 `
+[`Kotlin Avanzado`](../../Readme.md) > [`Sesión 05`](../Readme.md) > `Reto 1 `
 
 ## Reto 1: Broadcast Recerivers
 
@@ -17,9 +17,9 @@
 
 ### 3. Desarrollo :computer:
 
-1. Tenemos una aplicación que permite grabar llamadas, siempre y cuando haya una y tengamos permiso de checar el estado del teléfono. Implementar las siguientes medidas"
+1. Tenemos una aplicación que permite grabar llamadas, siempre y cuando haya una y tengamos permiso de checar el estado del teléfono. Implementar las siguientes medidas:
 
-a)  Agregar un botón de "Grabar llamada" que grabe únicamente cuando haya una  llamada en curso y con la condición dei tener el permiso de leer el estado del teléfono. En caso contrario, se debe mostrar un Toast especificando el por qué no se puede grabar.
+a)  Agregar un botón de "Grabar llamada" que grabe únicamente cuando haya una  llamada en curso y con la condición de tener el permiso de leer el estado del teléfono. En caso contrario, se debe mostrar un Toast especificando el por qué no se puede grabar.
 
 b) Si se cumplen los casos anteriores, se procede a mostrar un mensaje que indique que se está grabando.
 
@@ -61,8 +61,6 @@ c) Al momento de colgar o cerrar la aplicación, se debe mostrar un mensaje indi
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == 1) {
-
-           
             if (grantResults.isNotEmpty()
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED
             ) {
@@ -90,8 +88,6 @@ val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyM
 ```
 
 * TelephonyManager reconoce tres estados: CALL_STATE_OFFHOOK, CALL_STATE_RINGING y CALL_STATE_IDLE. El usuario debe buscar el valor de cada uno en la [documentación](https://developer.android.com/about/versions/11/reference/broadcast-intents-30)
-
-
 
 2. Crear una aplicación que envíe un broadcast implícito que transmita datos de una sesión  y otra que la reciba, interoperarlas para observar su correcto funcionamiento
 

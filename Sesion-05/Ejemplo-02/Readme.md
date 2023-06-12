@@ -43,7 +43,7 @@ Para este proyecto, hay qué utilizar el código [base](base).
 Por defecto, los content providers abren un canal de escritura y lectura a cualquier aplicación externa conectándose al provider, por lo que existe un mecanismo de permisos para personalizar este comportamiento. Para este caso, daremos permiso de lectura y escritura:
 
 ```xml
-<permission android:name="com.example.android.contentprovidersample.provider.READ_WRITE"/>
+<permission android:name="org.bedu.contentprovider.provider.READ_WRITE"/>
 ```
 
 
@@ -109,6 +109,7 @@ interface VehicleDao {
     @Query("SELECT * FROM ${Vehicle.TABLE_NAME} WHERE plates_number = :platesNumber")
     fun getVehicleByPlates(platesNumber: String) : Cursor
 }
+
 ```
 
 
@@ -121,9 +122,8 @@ Un UriMatcher es una utilidad que nos ayuda a identificar una uri ingresada con 
 const val VEHICLE_DIR = 1
 const val VEHICLE_ITEM = 2
 
-
 val vehicleMatcher = UriMatcher(UriMatcher.NO_MATCH).apply {
-    addURI(VehicleProvider.AUTHORITY, "${Vehicle.TABLE_NAME}", VEHICLE_DIR)
+    addURI(VehicleProvider.AUTHORITY, Vehicle.TABLE_NAME, VEHICLE_DIR)
     addURI(VehicleProvider.AUTHORITY, "${Vehicle.TABLE_NAME}/*", VEHICLE_ITEM)
 }
 ```
@@ -137,17 +137,14 @@ Ahora definiremos el contenido de nuestro content provider. Primero, declararemo
 
 
 ```kotlin
- // Acceso a la base de datos
-    private lateinit var vehicleDb: BeduDb
-
-    // Guarda la instancia de nuestro DAO
-    private var vehicleDao: VehicleDao? = null
+private val vehicleDao by lazy {
+        (context as BeduApplication).vehicleDao }
 ```
 
 También declararemos algunas strings estáticas que serán útiles dentro de la clase:
 
 ```kotlin
- companion object{
+companion object{
         const val AUTHORITY = "org.bedu.roomvehicles.provider"
         const val URI_STRING = "content://$AUTHORITY/"
         const val URI_VEHICLE = "$URI_STRING${Vehicle.TABLE_NAME}"
@@ -204,12 +201,13 @@ Para este caso, lo utilizaremos para identificar el tipo de dato a recuperar.
 
 
 
-Al momento de crearse nuestra clase, crearemos una nueva instancia de nuestra DB y su Dao, para referenciarlas en las variables previamente creadas para esto.
+Al momento de crearse nuestra clase, crearemos una nueva instancia de nuestro Dao, para referenciarlas en las variables previamente creadas para esto.
 
 ```kotlin
-  override fun onCreate(): Boolean {
-        vehicleDb = BeduDb.getInstance(context!!)!!
-        vehicleDao = vehicleDb.vehicleDao()
+private lateinit var vehicleDao: VehicleDao  
+
+override fun onCreate(): Boolean {
+        vehicleDao = (context as BeduApplication).vehicleDao
         return true
     }
 ```
@@ -218,7 +216,7 @@ El método ___getType___ servirá para identificar el tipo de dato que contiene 
 
 ```kotlin
    // muestra el MIME correspondiente al URI
-    override fun getType(uri: Uri): String? {
+    override fun getType(uri: Uri): String {
         return when(vehicleMatcher.match(uri)){
             VEHICLE_DIR -> MIME_CONTENT_TYPE
             VEHICLE_ITEM -> MIME_CONTENT_ITEM_TYPE
@@ -232,15 +230,15 @@ El método ___getType___ servirá para identificar el tipo de dato que contiene 
 Ahora implementamos el código para insertar un nuevo vehículo a través del método ___insert___. Identificaremos el tipo de dato en nuestra URI, en caso de ser un ___VEHICLE_DIR___, creamos un nuevo vehículo a partir del modelo, la marca y las placas; para insertarlo, utilizaremos nuestro Dao(), daremos aviso al content resolver del cambio efectuado y finalmente regresaremos en un Uri el id del nuevo vehículo. Si el vehículo es un ___VEHICLE_ITEM___, regresamos un error debido a que no podemos insertar un vehículo ya que el id lo crea automáticamente el motor.
 
 ```kotlin
-override fun insert(uri: Uri, values: ContentValues?): Uri? {
-        return when(vehicleMatcher.match(uri)){
+override fun insert(uri: Uri, values: ContentValues?): Uri {
+        when(vehicleMatcher.match(uri)){
             VEHICLE_DIR -> {
                 val vehicle = Vehicle(
                     model = values?.getAsString(Vehicle.COLUMN_MODEL),
                     brand = values?.getAsString(Vehicle.COLUMN_BRAND),
                     platesNumber = values?.getAsString(Vehicle.COLUMN_PLATES)
                 )
-                val id = context?.let { BeduDb.getInstance(it)?.vehicleDao()?.insertVehicle(vehicle) }
+                val id = context?.let { vehicleDao.insertVehicle(vehicle) }
                 context?.contentResolver?.notifyChange(uri,null)
                 return ContentUris.withAppendedId(uri, id!!.toLong())
             }
@@ -256,14 +254,14 @@ Para el método ___delete___, implementaremos algo similar a lo anterior. Para e
 
 ```kotlin
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int {
-        return when(vehicleMatcher.match(uri)){
+        when(vehicleMatcher.match(uri)){
             VEHICLE_DIR -> throw IllegalArgumentException("Invalid URI: id should be provided")
 
             VEHICLE_ITEM -> {
 
                 val id = ContentUris.parseId(uri)
-                val count = BeduDb.getInstance(context!!)?.vehicleDao()?.removeVehicleById(id.toInt())
-                return count!!
+                val count = vehicleDao.removeVehicleById(id.toInt())
+                return count
             }
 
             else -> throw IllegalArgumentException("Unknown Uri: $uri")
@@ -276,8 +274,8 @@ Para el método ___delete___, implementaremos algo similar a lo anterior. Para e
 Para actualizar los datos, lanzaremos una excepción si el tipo de dato es __VEHICLE_DIR__, mientras que para ***VEHICLE_ITEM***, obtenemos el id y los valores del vehículo para crear un objecto _Vehicle_, que pasaremos como parámetro al método del Dao ___updateVehicle()___.
 
 ```kotlin
-    override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<out String>?): Int {
-        return when(vehicleMatcher.match(uri)){
+override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<out String>?): Int {
+        when(vehicleMatcher.match(uri)){
             VEHICLE_DIR -> throw IllegalArgumentException("Invalid URI: id should be provided")
 
             VEHICLE_ITEM -> {
@@ -289,7 +287,7 @@ Para actualizar los datos, lanzaremos una excepción si el tipo de dato es __VEH
                         platesNumber = values?.getAsString(Vehicle.COLUMN_PLATES)
                 )
 
-                return BeduDb.getInstance(context!!)?.vehicleDao()?.updateVehicle(vehicle)!!
+                return vehicleDao.updateVehicle(vehicle)
 
             }
 
@@ -313,14 +311,15 @@ Finalmente, para el método ___query___, la consulta que efectuaremos sera _sele
         selection: String?,
         selectionArgs: Array<out String>?,
         sortOrder: String?
-    ): Cursor? {
-        return when(vehicleMatcher.match(uri)){
+    ): Cursor {
+        when(vehicleMatcher.match(uri)){
             VEHICLE_ITEM,VEHICLE_DIR -> {
                 val code = vehicleMatcher.match(uri)
-                val dao = BeduDb.getInstance(context!!)!!.vehicleDao()
+                Log.d("Vehicles","code: $code")
                 val cursor=
-                        if (code== VEHICLE_DIR) dao.getVehicles()
-                        else dao.getVehicleById(ContentUris.parseId(uri).toInt())
+                        if (code== VEHICLE_DIR) vehicleDao.getVehicles()
+                        else vehicleDao.getVehicleById(ContentUris.parseId(uri).toInt())
+                Log.d("Vehicles","cursor: ${cursor.count}")
                 cursor.setNotificationUri(context?.contentResolver, uri)
                 return cursor
             }
@@ -340,34 +339,26 @@ Ahora crearemos comunicación con el provider a través de un ___content resolve
 
 Reescribiremos el método ___onDelete___, que es llamado al momento de dar click en la opción eliminar de un vehículo.
 
-A través de un executor, ejecutaremos un proceso en segundo plano para llamar al método _delete_ de nuestro content resolver, enviando como parámetros la URI, la cláusula de nuestra query (el filtro) y el argumento de de esa cláusula (el id del vehículo a eliminar).
+A través de un coroutine, ejecutaremos un proceso en segundo plano para llamar al método _delete_ de nuestro content resolver, enviando como parámetros la URI, la cláusula de nuestra query (el filtro) y el argumento de de esa cláusula (el id del vehículo a eliminar).
 
 Después de ejecutar la query, eliminaremos el elemento de nuestro adapter y mostraremos un ***Toast*** con un mensaje de éxito.
 
 ```kotlin
     override fun onDelete(vehicle: Vehicle) {
+      val selectionClause = "${Vehicle.COLUMN_PK} LIKE ?"
+        val selectionArgs = arrayOf(vehicle.id.toString())
 
-        val executor: ExecutorService = Executors.newSingleThreadExecutor()
-
-        executor.execute(Runnable {
-            val selectionClause = "${Vehicle.COLUMN_PK} LIKE ?"
-            val selectionArgs = arrayOf(vehicle.id.toString())
-
-
-            context?.applicationContext?.contentResolver?.delete(
+        lifecycleScope.launch{
+            withContext(Dispatchers.IO) {
+                context?.applicationContext?.contentResolver?.delete(
                     Uri.parse("${VehicleProvider.URI_VEHICLE}/${vehicle.id}"),
                     selectionClause,
                     selectionArgs
-
-            )
-
-
-
-            Handler(Looper.getMainLooper()).post(Runnable {
-                adapter.removeItem(vehicle)
-                Toast.makeText(context,"Elemento eliminado!",Toast.LENGTH_SHORT).show()
-            })
-        })
+                )
+            }
+            adapter.removeItem(vehicle)
+            Toast.makeText(context,"Elemento eliminado!",Toast.LENGTH_SHORT).show()
+        }
     }
 ```
 
@@ -386,19 +377,20 @@ private val loaderCallbacks: LoaderManager.LoaderCallbacks<Cursor> = object : Lo
 El método ___onCreateLoader___ regresará un CursorLoader con la URI para una tabla y en segunda instancia un arreglo con los nombres de las columnas de un vehículo.
 
 ```kotlin
- override fun onCreateLoader(id: Int, @Nullable args: Bundle?): Loader<Cursor?> {
+override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor?> {
+            Log.d("Vehicles", VehicleProvider.URI_VEHICLE)
             return CursorLoader(requireContext().applicationContext,
-                    Uri.parse("${VehicleProvider.URI_VEHICLE}"),
-                    arrayOf(
-                            Vehicle.COLUMN_PK,
-                            Vehicle.COLUMN_BRAND,
-                            Vehicle.COLUMN_MODEL,
-                            Vehicle.COLUMN_PLATES,
-                            Vehicle.COLUMN_WORKING
-                    ),
-                    null,
-                    null,
-                    null
+                Uri.parse(VehicleProvider.URI_VEHICLE),
+                arrayOf(
+                    Vehicle.COLUMN_PK,
+                    Vehicle.COLUMN_BRAND,
+                    Vehicle.COLUMN_MODEL,
+                    Vehicle.COLUMN_PLATES,
+                    Vehicle.COLUMN_WORKING
+                ),
+                null,
+                null,
+                null
             )
         }
 ```
@@ -411,8 +403,12 @@ Cuando la carga de datos finalice, se ejecuta el método ___onLoadFinished___, p
  private val loaderCallbacks: LoaderManager.LoaderCallbacks<Cursor> = object : LoaderManager.LoaderCallbacks<Cursor> {
        
 
-        override fun onLoadFinished(loader: Loader<Cursor?>, data: Cursor?) {
+         override fun onLoadFinished(loader: Loader<Cursor?>, data: Cursor?) {
+
+            Log.d("Vehicles","termina, ${data?.count}")
+
             data?.apply {
+                // Determine the column index of the column named "word"
                 val pkIndex: Int = getColumnIndex(Vehicle.COLUMN_PK)
                 val brandIndex: Int = getColumnIndex(Vehicle.COLUMN_BRAND)
                 val modelIndex: Int = getColumnIndex(Vehicle.COLUMN_MODEL)
@@ -420,17 +416,18 @@ Cuando la carga de datos finalice, se ejecuta el método ___onLoadFinished___, p
                 val workingIndex: Int = getColumnIndex(Vehicle.COLUMN_WORKING)
 
                 while (moveToNext()) {
+                    // Gets the value from the column.
                     val pk = getInt(pkIndex)
                     val brand = getString(brandIndex)
                     val model = getString(modelIndex)
                     val plates = getString(platesIndex)
 
                     val vehicle = Vehicle(
-                            id = pk,
-                            brand = brand,
-                            model = model,
-                            platesNumber = plates,
-                            isWorking = true
+                        id = pk,
+                        brand = brand,
+                        model = model,
+                        platesNumber = plates,
+                        isWorking = true
                     )
 
 
@@ -439,14 +436,12 @@ Cuando la carga de datos finalice, se ejecuta el método ___onLoadFinished___, p
             }
 
 
-
-
-            adapter = VehicleAdapter(vehicleArray, getListener())
-            recyclerVehicle.adapter = adapter
+            adapter = VehicleAdapter(vehicleArray, this@VehicleListFragment)
+            binding.list.adapter = adapter
         }
 
         override fun onLoaderReset(loader: Loader<Cursor?>) {
-            recyclerVehicle.adapter = null
+            binding.list.adapter = null
         }
     }
 ```
@@ -466,32 +461,22 @@ Para prepoblar nuestra base de datos, podemos recurrir al método prepopulate() 
 Paso 5: para gregar un nuevo vehículo, usaríamos esto.
 
 ```kotlin
-addButton.setOnClickListener{
+    private suspend fun addVehicle() {
 
-            val executor: ExecutorService = Executors.newSingleThreadExecutor()
-
-            executor.execute(Runnable {
-                val values = ContentValues().apply {
-                    put(Vehicle.COLUMN_BRAND, brandEdit.text.toString())
-                    put(Vehicle.COLUMN_MODEL, modelEdit.text.toString())
-                    put(Vehicle.COLUMN_PLATES, platesEdit.text.toString())
-                    put(Vehicle.COLUMN_WORKING, workingSwitch.isEnabled)
-                }
-
-
-                context?.applicationContext?.contentResolver?.insert(
-                        Uri.parse("${VehicleProvider.URI_VEHICLE}"),
-                        values
-                )
-
-                Handler(Looper.getMainLooper()).post(Runnable {
-                    findNavController().navigate(
-                            R.id.action_addEditFragment_to_vehicleListFragment
-                    )
-                })
-            })
-
+        val values = ContentValues().apply {
+            put(Vehicle.COLUMN_BRAND, binding.editBrand.text.toString())
+            put(Vehicle.COLUMN_MODEL, binding.editModel.text.toString())
+            put(Vehicle.COLUMN_PLATES, binding.editPlates.text.toString())
+            put(Vehicle.COLUMN_WORKING, binding.switchWorking.isChecked)
         }
+
+        withContext(Dispatchers.IO) {
+            context?.applicationContext?.contentResolver?.insert(
+                Uri.parse(VehicleProvider.URI_VEHICLE),
+                values
+            )
+        }
+    }
 ```
 
 

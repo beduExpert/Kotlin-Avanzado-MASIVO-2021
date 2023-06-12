@@ -10,16 +10,16 @@ interface VehicleDao {
     fun insertAll(vehicle: List<Vehicle>)
 
     @Insert
-    fun insertVehicle(vehicle: Vehicle)
+    fun insertVehicle(vehicle: Vehicle): Long
 
     @Update
-    fun updateVehicle(vehicle: Vehicle)
+    fun updateVehicle(vehicle: Vehicle): Int
 
     @Delete
     fun removeVehicle(vehicle: Vehicle)
 
     @Query("DELETE FROM ${Vehicle.TABLE_NAME} WHERE ${Vehicle.COLUMN_PK}=:id")
-    fun removeVehicleById(id: Int)
+    fun removeVehicleById(id: Int): Int
 
     @Delete
     fun removeVehicles(vararg vehicles: Vehicle)
@@ -28,8 +28,8 @@ interface VehicleDao {
     fun getVehicles(): Cursor
 
     @Query("SELECT * FROM ${Vehicle.TABLE_NAME} WHERE ${Vehicle.COLUMN_PK} = :id")
-    fun getVehicleById(id: Int)
+    fun getVehicleById(id: Int): Cursor
 
     @Query("SELECT * FROM ${Vehicle.TABLE_NAME} WHERE plates_number = :platesNumber")
-    fun getVehicleByPlates(platesNumber: String)
+    fun getVehicleByPlates(platesNumber: String) : Cursor
 }

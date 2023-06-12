@@ -4,50 +4,77 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Switch
 import androidx.fragment.app.Fragment
-
-
-
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.launch
+import org.bedu.roomvehicles.databinding.FragmentAddEditBinding
+import org.bedu.roomvehicles.room.Vehicle
 
 class AddEditFragment : Fragment() {
 
-    private lateinit var platesEdit: EditText
-    private lateinit var brandEdit: EditText
-    private lateinit var modelEdit: EditText
-    private lateinit var workingSwitch: Switch
-    private lateinit var addButton: Button
-
-
-
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
+    private var editVehicle: Vehicle? = null
+    private var _binding: FragmentAddEditBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_add_edit, container, false)
+    ): View {
+        _binding = FragmentAddEditBinding.inflate(inflater, container, false)
 
 
-        platesEdit = view.findViewById(R.id.edit_plates)
-        brandEdit = view.findViewById(R.id.edit_brand)
-        modelEdit = view.findViewById(R.id.edit_model)
-        workingSwitch = view.findViewById(R.id.switch_working)
-        addButton = view.findViewById(R.id.button_add_car)
+        val vehicleId: Int? = arguments?.getInt("vehicle_id")
 
-        addButton.setOnClickListener{
-
-
-
+        vehicleId?.let { vId ->
+            lifecycleScope.launch {
+                setEditVehicleInViews(vId)
+            }
         }
 
-        return view
+        binding.buttonAddCar.setOnClickListener {
+            lifecycleScope.launch{
+                editVehicle?.let { editVehicle() } ?: run { addVehicle() }
+
+                findNavController().navigate(
+                    R.id.action_addEditFragment_to_vehicleListFragment
+                )
+            }
+        }
+
+
+        return binding.root
     }
+
+    private suspend fun setEditVehicleInViews(vehicleId: Int) {
+        /*Log.d("Vehicle", "$editVehicle")
+        binding.editPlates.setText(editVehicle?.platesNumber)
+        binding.editBrand.setText(editVehicle?.brand)
+        binding.editModel.setText(editVehicle?.model)
+        binding.switchWorking.isChecked = editVehicle?.isWorking ?: false
+        binding.buttonAddCar.text = "Actualizar"*/
+    }
+
+    private suspend fun editVehicle() {
+        editVehicle =  Vehicle(
+            id = editVehicle?.id!!,
+            brand = binding.editBrand.text.toString(),
+            platesNumber = binding.editPlates.text.toString(),
+            model = binding.editModel.text.toString(),
+            isWorking = binding.switchWorking.isEnabled
+        )
+
+
+    }
+
+    private suspend fun addVehicle() {
+        val vehicle = Vehicle(
+            brand = binding.editBrand.text.toString(),
+            platesNumber = binding.editPlates.text.toString(),
+            model = binding.editModel.text.toString(),
+            isWorking = binding.switchWorking.isChecked
+        )
+
+    }
+
 }

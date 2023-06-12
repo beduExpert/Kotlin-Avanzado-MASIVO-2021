@@ -6,21 +6,15 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
 import android.util.Log
-import org.bedu.roomvehicles.room.BeduDb
-import org.bedu.roomvehicles.room.ReducedVehicle
+import org.bedu.roomvehicles.BeduApplication
 import org.bedu.roomvehicles.room.Vehicle
 import org.bedu.roomvehicles.room.VehicleDao
 import java.lang.IllegalArgumentException
-import java.net.URI
 
 class VehicleProvider: ContentProvider() {
 
-
-    // Acceso a la base de datos
-    private lateinit var vehicleDb: BeduDb
-
     // Guarda la instancia de nuestro DAO
-    private var vehicleDao: VehicleDao? = null
+    private lateinit var vehicleDao: VehicleDao
 
     companion object{
         const val AUTHORITY = "org.bedu.roomvehicles.provider"
@@ -31,8 +25,7 @@ class VehicleProvider: ContentProvider() {
     }
 
     override fun onCreate(): Boolean {
-        vehicleDb = BeduDb.getInstance(context!!)!!
-        vehicleDao = vehicleDb.vehicleDao()
+        vehicleDao = (context as BeduApplication).vehicleDao
         return true
     }
 
@@ -43,16 +36,15 @@ class VehicleProvider: ContentProvider() {
         selection: String?,
         selectionArgs: Array<out String>?,
         sortOrder: String?
-    ): Cursor? {
-        return when(vehicleMatcher.match(uri)){
+    ): Cursor {
+        when(vehicleMatcher.match(uri)){
             VEHICLE_ITEM,VEHICLE_DIR -> {
                 val code = vehicleMatcher.match(uri)
-                Log.d("Vehicles","code: ${code}")
-                val dao = BeduDb.getInstance(context!!)!!.vehicleDao()
+                Log.d("Vehicles","code: $code")
                 val cursor=
-                        if (code== VEHICLE_DIR) dao.getVehicles()
-                        else dao.getVehicleById(ContentUris.parseId(uri).toInt())
-                Log.d("Vehicles","cursosr: ${cursor.count}")
+                        if (code== VEHICLE_DIR) vehicleDao.getVehicles()
+                        else vehicleDao.getVehicleById(ContentUris.parseId(uri).toInt())
+                Log.d("Vehicles","cursor: ${cursor.count}")
                 cursor.setNotificationUri(context?.contentResolver, uri)
                 return cursor
             }
@@ -61,7 +53,7 @@ class VehicleProvider: ContentProvider() {
     }
 
     // muestra el MIME correspondiente al URI
-    override fun getType(uri: Uri): String? {
+    override fun getType(uri: Uri): String {
         return when(vehicleMatcher.match(uri)){
             VEHICLE_DIR -> MIME_CONTENT_TYPE
             VEHICLE_ITEM -> MIME_CONTENT_ITEM_TYPE
@@ -70,15 +62,15 @@ class VehicleProvider: ContentProvider() {
     }
 
 
-    override fun insert(uri: Uri, values: ContentValues?): Uri? {
-        return when(vehicleMatcher.match(uri)){
+    override fun insert(uri: Uri, values: ContentValues?): Uri {
+        when(vehicleMatcher.match(uri)){
             VEHICLE_DIR -> {
                 val vehicle = Vehicle(
                     model = values?.getAsString(Vehicle.COLUMN_MODEL),
                     brand = values?.getAsString(Vehicle.COLUMN_BRAND),
                     platesNumber = values?.getAsString(Vehicle.COLUMN_PLATES)
                 )
-                val id = context?.let { BeduDb.getInstance(it)?.vehicleDao()?.insertVehicle(vehicle) }
+                val id = context?.let { vehicleDao.insertVehicle(vehicle) }
                 context?.contentResolver?.notifyChange(uri,null)
                 return ContentUris.withAppendedId(uri, id!!.toLong())
             }
@@ -90,14 +82,14 @@ class VehicleProvider: ContentProvider() {
     }
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int {
-        return when(vehicleMatcher.match(uri)){
+        when(vehicleMatcher.match(uri)){
             VEHICLE_DIR -> throw IllegalArgumentException("Invalid URI: id should be provided")
 
             VEHICLE_ITEM -> {
 
                 val id = ContentUris.parseId(uri)
-                val count = BeduDb.getInstance(context!!)?.vehicleDao()?.removeVehicleById(id.toInt())
-                return count!!
+                val count = vehicleDao.removeVehicleById(id.toInt())
+                return count
             }
 
             else -> throw IllegalArgumentException("Unknown Uri: $uri")
@@ -105,7 +97,7 @@ class VehicleProvider: ContentProvider() {
     }
 
     override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<out String>?): Int {
-        return when(vehicleMatcher.match(uri)){
+        when(vehicleMatcher.match(uri)){
             VEHICLE_DIR -> throw IllegalArgumentException("Invalid URI: id should be provided")
 
             VEHICLE_ITEM -> {
@@ -117,7 +109,7 @@ class VehicleProvider: ContentProvider() {
                         platesNumber = values?.getAsString(Vehicle.COLUMN_PLATES)
                 )
 
-                return BeduDb.getInstance(context!!)?.vehicleDao()?.updateVehicle(vehicle)!!
+                return vehicleDao.updateVehicle(vehicle)
 
             }
 
