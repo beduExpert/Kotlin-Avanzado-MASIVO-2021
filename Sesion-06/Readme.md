@@ -23,6 +23,7 @@
 Antes de implementar firebase en nuestra app, debemos configurar un proyecto en la Firebase console. Para esto seguiremos los siguientes pasos:
 
 a) Abriremos la [Firebase Console](https://console.firebase.google.com/?hl=es) con una cuenta google que poseamos y crearemos un proyecto nuevo.
+
 <img src="images/01.png" width="40%"/>
 
 b) Asignamos un nombre (en este caso, le llamaremos BeduPracticas)
@@ -48,32 +49,16 @@ g) Descargar el archivo *google-services.json* y moverlo a la carpeta app del pr
 <img src="images/06.png" width="40%"/>
 
 
-Vamos a comenzar instalando lo necesario para hacer funcionar Crashlytics
+Vamos a comenzar instalando lo necesario para hacer funcionar Firebase
 
 1. Abrir el archivo *build.gradle* que está en la raíz de nuestro proyecto.
 
 2. Copiar los repositorios necesarios tal como se muestra a continuación:
 
 ```kotlin
-buildscripts {
-    repositories {
-        // ...
-        google() //si no estaba, agregarlo
-    }
-
-    dependencies {
-        // ...
-         classpath 'com.google.gms:google-services:4.3.5'  // plugin de Google Services
-          classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.2' //el plugin de crashlytics
-    }
-}
-
-allprojects {
-    // ...
-    repositories {
-       // ...
-       google() //si no estaba, agragarlo
-    }
+plugins {
+ 	...
+    id 'com.google.gms.google-services' version '4.3.15' apply false
 }
 
 ```
@@ -82,7 +67,7 @@ allprojects {
 
 ```groovy
 plugins{
-	id 'com.android.application'
+  ...
 	id 'com.google.gms.google-services'
 }
 ```
@@ -92,7 +77,7 @@ plugins{
 3. Ahora, agregaremos la BoM de Firebase (Bill of Materials), que nos sirve para tener qué declarar nuestra versión de firebase únicamente en el mismo BoM.
 
    ```groovy
-   implementation platform('com.google.firebase:firebase-bom:27.0.0')
+   implementation platform('com.google.firebase:firebase-bom:32.1.0')
    ```
 
 4. En el mismo archivo, agregar la dependencia opcional de analytics
@@ -147,13 +132,3 @@ Esta es una guía anexa de consejos para una mejor planeación de tu proyecto pa
 [`Anterior`](../Sesion-03/Readme.md) | [`Siguiente`](../Sesion-05/Readme.md)      
 
 </div>
-
-### 5. Temas adicionales  :open_book:
-
-#### <ins>Crashlytics</ins>
-
-Crearemos reportes de errores en nuestra aplicación y los visualizaremos dentro de la consola de Firebase.
-
-* [**`EJEMPLO 4`**](Ejemplo-04)
-
-* [**`RETO 3`**](Reto-03)

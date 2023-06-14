@@ -19,9 +19,12 @@ Enriquecer nuestro conocimiento de notificaciones con nuevos conceptos
 
 Estaremos utilizando el proyecto del [Reto 1](../Reto-01) como base 
 
-1.- Agregaremos unos botones a nuestro menú, quedando el layout así: 
+Obviaremos la llamada a cada método de las notificaciones en el listener de cada respectivo botón.
+
+1.- Agregaremos los siguientes botones a nuestro menú: 
 
 ```xml
+<?xml version="1.0" encoding="utf-8"?>
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -96,15 +99,9 @@ Estaremos utilizando el proyecto del [Reto 1](../Reto-01) como base
 
 <img src="images/01.png" width="33%"/>
 
-2. Agregamos la depencdenciar de ___FCM___ en ___app/build.gradle___.
 
-   
 
-   ```groovy
-   implementation 'com.google.firebase:firebase-messaging-ktx'
-   ```
-
-3. Crearemos grupos de notificaciones, para esto, comenzaremos asignando un string como id en nuestro ***MainActivity***.
+2. Crearemos grupos de notificaciones, para esto, comenzaremos asignando un string como id en nuestro `NotificationApp`
 
 ```kotlin
 val GRUPO_SIMPLE = "GRUPO_SIMPLE"
@@ -128,45 +125,49 @@ val GRUPO_SIMPLE = "GRUPO_SIMPLE"
             .setGroup(GRUPO_SIMPLE)
 ```
 
-5. En nuestra función simpleNotification agregaremos otras dos notificaciones con el mismo grupo pero diferente contenido
+Crearemos este método privado para crear una instancia de Builder de notificación simple:
+
+5. ```kotlin
+   private fun simpleNotificationBuilder(context: Context, titleId: Int, contentId: Int) =
+       NotificationCompat.Builder(context, CHANNEL_ID)
+           .setSmallIcon(R.drawable.triforce)
+           .setColor(context.getColor(R.color.triforce))
+           .setContentTitle(context.getString(titleId))
+           .setContentText(context.getString(contentId))
+           .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+   ```
+
+6. En nuestra función `simpleNotification()`, modificaremos el código para crear otras dos notificaciones con el mismo grupo pero otro contenido.
 
 ```kotlin
-var builder2 = NotificationCompat.Builder(this, CHANNEL_OTHERS)
-            .setSmallIcon(R.drawable.triforce) //seteamos el ícono de la push notification
-            .setColor(getColor(R.color.triforce)) //definimos el color del ícono y el título de la notificación
-            .setContentTitle(getString(R.string.simple_title_2)) //seteamos el título de la notificación
-            .setContentText(getString(R.string.simple_body_2)) //seteamos el cuerpo de la notificación
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT) //Ponemos una prioridad por defecto
-            .setGroup(GRUPO_SIMPLE)
+@SuppressLint("MissingPermission")
+fun simpleNotification(context: Context){
 
-        var builder3 = NotificationCompat.Builder(this, CHANNEL_OTHERS)
-            .setSmallIcon(R.drawable.triforce) //seteamos el ícono de la push notification
-            .setColor(getColor(R.color.triforce)) //definimos el color del ícono y el título de la notificación
-            .setContentTitle(getString(R.string.simple_title_3)) //seteamos el título de la notificación
-            .setContentText(getString(R.string.simple_body_3)) //seteamos el cuerpo de la notificación
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT) //Ponemos una prioridad por defecto
-            .setGroup(GRUPO_SIMPLE)
+    val builder = simpleNotificationBuilder(context, R.string.simple_title, R.string.simple_body)
+    val builder2 = simpleNotificationBuilder(context, R.string.simple_title, R.string.simple_body)
+    val builder3 = simpleNotificationBuilder(context, R.string.simple_title, R.string.simple_body)
+}
 ```
 
 6. Creamos una nueva notificación, esta será la que agrupe a las otras dos notificaciones, el método setter *setGroupSummary(true)* hace que esta notificación sea de agrupaación. Esta es la forma más sencilla pero se pueden agregar más detalles al grupo. **NOTA: para versiones menores a API 24, se necesitan pasos adicionaales, ver más en la documentación**
 
 ```kotlin
- val summaryNotification = NotificationCompat.Builder(this@MainActivity, CHANNEL_OTHERS)
-            .setSmallIcon(R.drawable.bedu_icon)
-            .setGroup(GRUPO_SIMPLE)
-            .setGroupSummary(true)
-            .build()
+val summaryNotification = NotificationCompat.Builder(context, CHANNEL_OTHERS)
+        .setSmallIcon(R.drawable.bedu_icon)
+        .setGroup(GRUPO_SIMPLE)
+        .setGroupSummary(true)
+        .build()
 ```
 
 y lanzamos las tres notificaciones y el agrupador
 
 ```kotlin
-with(NotificationManagerCompat.from(this)) {
-            notify(20, builder.build())
-            notify(21, builder2.build())
-            notify(22, builder3.build())
-            notify(23, summaryNotification)
-        }
+with(NotificationManagerCompat.from(context)) {
+        notify(20, builder.build())
+        notify(21, builder2.build())
+        notify(22, builder3.build())
+        notify(23, summaryNotification)
+}
 ```
 
 El grupo colapsado debe verse así:
@@ -177,34 +178,38 @@ y Expandido:
 
 <img src="images/03.png" width="33%"/>
 
+
+
 7. Crearemos ahora una notificación expansible para cuando un texto es muy grande para el tamaño default de una notificación. Para ello asignamos el estilo del builder con **setStyle** y dentro del método declaramos el texto largo ccon *bigText(texto)*
 
 ```kotlin
-    private fun expandableNotification(){
-
-        var notification = NotificationCompat.Builder(this, CHANNEL_OTHERS)
+@SuppressLint("MissingPermission")
+fun expandableNotification(context: Context) {
+    with(context) {
+        val notification = NotificationCompat.Builder(this, CHANNEL_OTHERS)
             .setSmallIcon(R.drawable.bedu_icon)
             .setContentTitle(getString(R.string.simple_title))
             .setContentText(getString(R.string.large_text))
-            .setLargeIcon(getDrawable(R.drawable.bedu)?.toBitmap()) //ícono grande a la derecha
-            .setStyle(NotificationCompat.BigTextStyle() //este estilo define al expandible
-                .bigText(getString(R.string.large_text))) //Cuerpo de la notificación cuando se expande
+            .setLargeIcon(getDrawable(R.drawable.bedu)?.toBitmap()) // ícono grande a la derecha
+            .setStyle(NotificationCompat.BigTextStyle() // este estilo define al expandible
+                .bigText(getString(R.string.large_text)))
             .build()
 
         with(NotificationManagerCompat.from(this)) {
             notify(50, notification)
         }
-
     }
-
+}
 ```
 
 Asignamos el método al botón correspondiente. 
 
 Esta es la notificación expandida
+
 <img src="images/04.png" width="33%"/>
 
 Esta es la notificación colapsada
+
 <img src="images/05.png" width="33%"/>
 
 
@@ -218,7 +223,7 @@ para colapsado:
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/black"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
@@ -241,7 +246,7 @@ para expandido:
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/black"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
@@ -266,9 +271,11 @@ para expandido:
 9. Creamos nuestra función para lanzar nuestra notificación
 
 ```kotlin
-private fun customNotification(){
-        
-        //obtenemos los layouts por medio de RemoteViews
+@SuppressLint("MissingPermission")
+fun customNotification(context: Context) {
+
+    with(context) {
+        // obtenemos los layouts por medio de RemoteViews
         val notificationLayout = RemoteViews(packageName, R.layout.notification_custom)
         val notificationLayoutExpanded = RemoteViews(packageName, R.layout.notification_custom_expanded)
 
@@ -283,16 +290,19 @@ private fun customNotification(){
         with(NotificationManagerCompat.from(this)) {
             notify(60, notification)
         }
-
     }
+}
+
 ```
 
 y lo asignamos al listener de su botón
 
 La vista expandida se ve así:
+
 <img src="images/06.png" width="33%"/>
 
 y contraída: 
+
 <img src="images/07.png" width="33%"/>
 
 

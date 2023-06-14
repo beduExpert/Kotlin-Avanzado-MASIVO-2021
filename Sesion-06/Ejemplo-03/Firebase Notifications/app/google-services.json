@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "698429357465",
+    "project_id": "borrar-a95f6",
+    "storage_bucket": "borrar-a95f6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:698429357465:android:21a25d3133901e446aa708",
+        "android_client_info": {
+          "package_name": "org.bedu.firebasenotifications"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "698429357465-9ie7va8mchusrrn0udg779r5c1on52rn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDU3SFfBmEL4y51PvyfgTbX9SNXYAfdV9A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "698429357465-9ie7va8mchusrrn0udg779r5c1on52rn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

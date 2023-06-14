@@ -5,8 +5,6 @@
 <div style="text-align: justify;">
 
 
-
-
 ### 1. Objetivos :dart:
 
 Poner a prueba y enriquecer el conocimiento adquirido en el [Ejemplo 2](../Ejemplo-02)

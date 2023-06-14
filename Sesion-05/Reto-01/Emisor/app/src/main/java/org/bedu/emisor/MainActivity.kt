@@ -3,6 +3,11 @@ package org.bedu.emisor
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.bedu.emisor.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -23,9 +28,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.emitterButton.setOnClickListener{
-            Intent("org.bedu.actions.DATA_TRANSFER").apply {
-                putExtras(bundle)
-            }.let(::sendBroadcast)
+
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(1000)
+                Intent("org.bedu.actions.DATA_TRANSFER").apply {
+                    putExtras(bundle)
+                }.let(::sendBroadcast)
+            }
 
         }
     }

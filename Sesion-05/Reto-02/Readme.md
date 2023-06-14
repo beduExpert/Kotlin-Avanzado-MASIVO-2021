@@ -5,8 +5,6 @@
 <div style="text-align: justify;">
 
 
-
-
 ### 1. Objetivos :dart:
 
 * Implementar el método update() de nuestro Content Provider.

@@ -5,8 +5,6 @@
 <div style="text-align: justify;">
 
 
-
-
 ### 1. Objetivos :dart:
 
 * Instalar y utilizar el SDK de Firebase Message Cloud para el uso de push notifications
@@ -19,35 +17,9 @@
 
 ### 3. Desarrollo :computer:
 
-Vamos a instalar la SDK de FCM Para android, y después la utilizaremos. Para ello, hay que configurar la aplicación en nuestro proyecto de Firebase (creado previamente en la [Sesión 5](../../Sesión-05) ), en el [Ejemplo 1](../../Sesion-05/Ejemplo-01) para ser exactos.
+Vamos a instalar la SDK de FCM Para android, y después la utilizaremos. Para ello, hay que configurar la aplicación en nuestro proyecto de Firebase (creado previamente al principio de esta sesión ).
 
-
-
-**IMPORTANTE**: Debido a que FCM hace uso del SDK de Play Services, Se requiere una imagen de Android que tenga una versión compatible de Google Play Services.
-
-a) En la pantalla de inicio del proyecto, click la opción *Añadir aplicación* y al ícono de android
-
-<img src="img/01.png" width="40%"/>
-
-<img src="img/02.png" width="40%"/>
-
-b) Registrar el nombre del paquete de la aplicación y su nickname
-
-<img src="img/03.png" width="40%"/>
-
-c) Descargar el archivo *google-services.json* y moverlo a la carpeta app del proyecto, como se indica en la imagen
-
-
-***Opcional:*** *el paso de comprobación puede ser saltado*
-
-d) Instalar las dependencias, tal cual se muestra en las instrucciones y sincroniza el proyecto.
-
-<img src="img/04.png" width="40%"/>
-
-**¡LISTO!** Ya tienes firebase en tu proyecto.
-
-
-1. Agregar la dependencia en gradle de FCM
+Agregar la dependencia en gradle de FCM
 
 ```groovy
 implementation 'com.google.firebase:firebase-messaging-ktx'
@@ -71,7 +43,7 @@ class FirebaseMessaging: FirebaseMessagingService() {
         </service>
 ```
 
-3. Agregar el ícono bedu_icon del proyecto anterior a *drawable*. En el manifest pondremos estas líneas para agregaar un ícono si desde el servicio no se define uno, al igual que el otro metadata para notification channels.
+3.  En el manifest pondremos estas líneas para agregaar un ícono si desde el servicio no se define uno, al igual que el otro metadata para notification channels.
 
 ```xml
 <meta-data
@@ -119,33 +91,32 @@ FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener {
 
 9. Ingresar el token copiado en la ventana, agregarlo y pulsar Test. **Nota: Importante cerrar la app o minimizarla**
 
-  <img src="img/09.png" width="40%"/>
+<img src="img/09.png" width="40%"/>
 
 10. Recibirán una notificación como esta: 
 
-    <img src="img/10.png" width="40%"/>
+<img src="img/10.png" width="40%"/>
 
 #### Declarando el canal de notificación
 
-Vamos a declarar el canal de notificación a utilizar, En el *MainActivity*.
+Vamos a declarar el canal de notificación a utilizar, En el `FirebaseApp`.
 
 ```kotlin
-companion object{
-        const val CHANNEL_ID = "CANAL_GENERICO"
+class FirebaseApp: Application() {
+
+    companion object {
+        const val CHANNEL_ID = "DEFAULT_CHANNEL"
     }
 
-...
-
-override fun onCreate(savedInstanceState: Bundle?) {
-...
-if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    override fun onCreate() {
+        super.onCreate()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setNotificationChannel()
         }
-...
-}
+    }
 
-...
-private fun setNotificationChannel(){
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun setNotificationChannel(){
         val channel = NotificationChannel(
             CHANNEL_ID,
             "Canal Generico",
@@ -159,6 +130,9 @@ private fun setNotificationChannel(){
 
         notificationManager.createNotificationChannel(channel)
     }
+
+}
+    
 ```
 
 
@@ -180,10 +154,11 @@ override fun onMessageReceived(remoteMessage: RemoteMessage) {
 En el método anterior, mandamos a llamar al método ___sendNotification()___, cuyo propósito es detonar nuestra notificación a través de nuestro ___NotificationManager___. Por lo cual la declaramos de la siguiente forma:
 
 ```kotlin
-    private fun sendNotification(title: String?, body: String?){
+    @SuppressLint("MissingPermission")
+    private fun sendNotification(title: String?, body: String?) {
         Log.d("FCM_MESSAGE", "Cuerpo de la notificación: $body")
 
-        val notificationBuilder = NotificationCompat.Builder(this,MainActivity.CHANNEL_ID)
+        val notificationBuilder = NotificationCompat.Builder(this,CHANNEL_ID)
             .setSmallIcon(R.drawable.bedu_icon)
             .setContentTitle(title)
             .setContentText(body)
