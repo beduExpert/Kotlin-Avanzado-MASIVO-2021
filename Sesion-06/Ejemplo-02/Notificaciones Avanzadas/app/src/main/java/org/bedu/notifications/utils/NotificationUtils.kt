@@ -11,7 +11,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.toBitmap
 import org.bedu.notifications.BeduActivity
-import org.bedu.notifications.NotificationApp.Companion.CHANNEL_ID
+import org.bedu.notifications.NotificationApp.Companion.CHANNEL_COURSES
 import org.bedu.notifications.NotificationApp.Companion.CHANNEL_OTHERS
 import org.bedu.notifications.NotificationApp.Companion.GRUPO_SIMPLE
 import org.bedu.notifications.NotificationReceiver
@@ -24,33 +24,30 @@ const val ACTION_RECEIVED = "action_received"
 @SuppressLint("MissingPermission")
 fun simpleNotification(context: Context){
 
-    val builder = simpleNotificationBuilder(context, R.string.simple_title, R.string.simple_body)
-    val builder2 = simpleNotificationBuilder(context, R.string.simple_title, R.string.simple_body)
-    val builder3 = simpleNotificationBuilder(context, R.string.simple_title, R.string.simple_body)
+    val notification = NotificationCompat.Builder(context, CHANNEL_OTHERS)
+        .setSmallIcon(R.drawable.triforce)
+        .setColor(context.getColor(R.color.triforce))
+        .setContentTitle(context.getString(R.string.simple_title))
+        .setContentText(context.getString(R.string.simple_body))
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setGroup(GRUPO_SIMPLE)
+        .build()
 
     val summaryNotification = NotificationCompat.Builder(context, CHANNEL_OTHERS)
         .setSmallIcon(R.drawable.bedu_icon)
+        .setStyle(NotificationCompat.InboxStyle()
+            .setSummaryText("2 new messages"))
         .setGroup(GRUPO_SIMPLE)
         .setGroupSummary(true)
         .build()
 
     //lanzamos la notificación
     with(NotificationManagerCompat.from(context)) {
-        notify(20, builder.build())
-        notify(21, builder2.build())
-        notify(22, builder3.build())
+        notify(20, notification)
+        notify(21, notification)
         notify(23, summaryNotification)
     }
 }
-
-private fun simpleNotificationBuilder(context: Context, titleId: Int, contentId: Int) =
-    NotificationCompat.Builder(context, CHANNEL_ID)
-        .setSmallIcon(R.drawable.triforce)
-        .setColor(context.getColor(R.color.triforce))
-        .setContentTitle(context.getString(titleId))
-        .setContentText(context.getString(contentId))
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setGroup(GRUPO_SIMPLE)
 
 @SuppressLint("MissingPermission")
 fun touchNotification(activity: Context) {
@@ -65,7 +62,7 @@ fun touchNotification(activity: Context) {
         PendingIntent.FLAG_IMMUTABLE
     )
 
-    val builder = NotificationCompat.Builder(activity, CHANNEL_ID)
+    val builder = NotificationCompat.Builder(activity, CHANNEL_OTHERS)
         .setSmallIcon(R.drawable.bedu_icon)
         .setContentTitle(activity.getString(R.string.action_title))
         .setContentText(activity.getString(R.string.action_body))
@@ -89,7 +86,7 @@ fun buttonNotification(activity: Activity) {
     val acceptPendingIntent: PendingIntent =
         PendingIntent.getBroadcast(activity, 0, acceptIntent, PendingIntent.FLAG_IMMUTABLE)
 
-    val builder = NotificationCompat.Builder(activity, CHANNEL_ID)
+    val builder = NotificationCompat.Builder(activity, CHANNEL_COURSES)
         .setSmallIcon(R.drawable.bedu_icon)
         .setContentTitle(activity.getString(R.string.button_title))
         .setContentText(activity.getString(R.string.button_body))

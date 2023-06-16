@@ -16,77 +16,7 @@
 
 
 
-### 2. Contenido :blue_book:
-
-### Firebase - Setup inicial
-
-Antes de implementar firebase en nuestra app, debemos configurar un proyecto en la Firebase console. Para esto seguiremos los siguientes pasos:
-
-a) Abriremos la [Firebase Console](https://console.firebase.google.com/?hl=es) con una cuenta google que poseamos y crearemos un proyecto nuevo.
-
-<img src="images/01.png" width="40%"/>
-
-b) Asignamos un nombre (en este caso, le llamaremos BeduPracticas)
-
-c) Aceptaremos Google Analytics 
-
-<img src="images/02.png" width="40%"/>
-
-d) Seleccionamos México como *Ubicación de Analytics*, aceptaremos todos los términos y click en *Crear proyecto*
-
-<img src="images/03.png" width="40%"/>
-
-e) En la pantalla de inicio del proyecto, buscar el ícono de android y dar click sobre él
-
-<img src="images/04.png" width="40%"/>
-
-f) Registrar el nombre del paquete de la aplicación y su nick
-
-<img src="images/05.png" width="40%"/>
-
-g) Descargar el archivo *google-services.json* y moverlo a la carpeta app del proyecto, como se indica en la imagen
-
-<img src="images/06.png" width="40%"/>
-
-
-Vamos a comenzar instalando lo necesario para hacer funcionar Firebase
-
-1. Abrir el archivo *build.gradle* que está en la raíz de nuestro proyecto.
-
-2. Copiar los repositorios necesarios tal como se muestra a continuación:
-
-```kotlin
-plugins {
- 	...
-    id 'com.google.gms.google-services' version '4.3.15' apply false
-}
-
-```
-
-2. Abrir *app/build.gradle* y aplicar el plugin de fabric después del plugin *com.android.application*:
-
-```groovy
-plugins{
-  ...
-	id 'com.google.gms.google-services'
-}
-```
-
-
-
-3. Ahora, agregaremos la BoM de Firebase (Bill of Materials), que nos sirve para tener qué declarar nuestra versión de firebase únicamente en el mismo BoM.
-
-   ```groovy
-   implementation platform('com.google.firebase:firebase-bom:32.1.0')
-   ```
-
-4. En el mismo archivo, agregar la dependencia opcional de analytics
-
-```kotlin
-implementation 'com.google.firebase:firebase-analytics-ktx' // Opcional, pero la agregaremos
-```
-
- 
+### 2. Contenido :blue_book: 
 
 #### <ins>Notifications</ins>
 

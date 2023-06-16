@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/btnNotify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Notificación simple"
+        app:layout_constraintBottom_toTopOf="@id/btnActionNotify"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnActionNotify"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="Notificación con direccionamiento"
+        app:layout_constraintBottom_toTopOf="@id/btnNotifyWithBtn"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnNotify" />
+
+    <Button
+        android:id="@+id/btnNotifyWithBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="notificación con botón"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnActionNotify" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

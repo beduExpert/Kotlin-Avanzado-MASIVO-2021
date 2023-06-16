@@ -17,7 +17,7 @@ Enriquecer nuestro conocimiento de notificaciones con nuevos conceptos
 
 ### 3. Desarrollo :computer:
 
-Estaremos utilizando el proyecto del [Reto 1](../Reto-01) como base 
+Estaremos utilizando la  [solución del reto 1](../Reto-01) como base.
 
 Obviaremos la llamada a cada método de las notificaciones en el listener de cada respectivo botón.
 
@@ -125,49 +125,39 @@ val GRUPO_SIMPLE = "GRUPO_SIMPLE"
             .setGroup(GRUPO_SIMPLE)
 ```
 
-Crearemos este método privado para crear una instancia de Builder de notificación simple:
-
-5. ```kotlin
-   private fun simpleNotificationBuilder(context: Context, titleId: Int, contentId: Int) =
-       NotificationCompat.Builder(context, CHANNEL_ID)
-           .setSmallIcon(R.drawable.triforce)
-           .setColor(context.getColor(R.color.triforce))
-           .setContentTitle(context.getString(titleId))
-           .setContentText(context.getString(contentId))
-           .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-   ```
-
-6. En nuestra función `simpleNotification()`, modificaremos el código para crear otras dos notificaciones con el mismo grupo pero otro contenido.
+5. Modificaremos el méstodo `simpleNotification` para  obtener una instancia del objeto, que utilizaremos múltiples veces:
 
 ```kotlin
-@SuppressLint("MissingPermission")
-fun simpleNotification(context: Context){
-
-    val builder = simpleNotificationBuilder(context, R.string.simple_title, R.string.simple_body)
-    val builder2 = simpleNotificationBuilder(context, R.string.simple_title, R.string.simple_body)
-    val builder3 = simpleNotificationBuilder(context, R.string.simple_title, R.string.simple_body)
-}
+val notification = NotificationCompat.Builder(context, CHANNEL_OTHERS)
+        .setSmallIcon(R.drawable.triforce)
+        .setColor(context.getColor(R.color.triforce))
+        .setContentTitle(context.getString(R.string.simple_title))
+        .setContentText(context.getString(R.string.simple_body))
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setGroup(GRUPO_SIMPLE)
+        .build()
 ```
 
-6. Creamos una nueva notificación, esta será la que agrupe a las otras dos notificaciones, el método setter *setGroupSummary(true)* hace que esta notificación sea de agrupaación. Esta es la forma más sencilla pero se pueden agregar más detalles al grupo. **NOTA: para versiones menores a API 24, se necesitan pasos adicionaales, ver más en la documentación**
+6. Creamos una nueva notificación, esta será la que agrupe a las otras dos notificaciones, el método setter *setGroupSummary(true)* hace que esta notificación sea de agrupaación. Esta es la forma más sencilla pero se pueden agregar más detalles al grupo. **NOTA: para versiones menores a API 24, se necesitan pasos adicionales, ver más en la documentación**
 
 ```kotlin
 val summaryNotification = NotificationCompat.Builder(context, CHANNEL_OTHERS)
         .setSmallIcon(R.drawable.bedu_icon)
+        .setStyle(NotificationCompat.InboxStyle()
+            .setSummaryText("2 new messages"))
         .setGroup(GRUPO_SIMPLE)
         .setGroupSummary(true)
         .build()
 ```
 
-y lanzamos las tres notificaciones y el agrupador
+y lanzamos las dos notificaciones con el agrupador:
 
 ```kotlin
 with(NotificationManagerCompat.from(context)) {
-        notify(20, builder.build())
-        notify(21, builder2.build())
-        notify(22, builder3.build())
+        notify(20, notification)
+        notify(21, notification)
         notify(23, summaryNotification)
-}
+    }
 ```
 
 El grupo colapsado debe verse así:

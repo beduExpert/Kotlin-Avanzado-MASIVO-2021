@@ -12,7 +12,6 @@ class NotificationApp: Application() {
     companion object {
         const val CHANNEL_COURSES = "CURSOS"
         const val CHANNEL_OTHERS = "OTROS"
-        const val GRUPO_SIMPLE = "GRUPO_SIMPLE"
     }
 
     override fun onCreate() {

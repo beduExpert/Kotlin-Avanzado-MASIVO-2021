@@ -17,15 +17,79 @@
 
 ### 3. Desarrollo :computer:
 
-Vamos a instalar la SDK de FCM Para android, y después la utilizaremos. Para ello, hay que configurar la aplicación en nuestro proyecto de Firebase (creado previamente al principio de esta sesión ).
+Para este ejemplo utilizaremos el [Proyecto base](./base) que tiene algunos componentes y recursos preestablecidos.
 
-Agregar la dependencia en gradle de FCM
+#### Firebase - Setup inicial
+
+Antes de implementar firebase en nuestra app, debemos configurar un proyecto en la Firebase console. Para esto seguiremos los siguientes pasos:
+
+a) Abriremos la [Firebase Console](https://console.firebase.google.com/?hl=es) con una cuenta google que poseamos y crearemos un proyecto nuevo.
+
+<img src="./img/setup/01.png" width="40%"/>
+
+b) Asignamos un nombre (en este caso, le llamaremos BeduPracticas)
+
+c) Aceptaremos Google Analytics 
+
+<img src="./img/setup/02.png" width="40%"/>
+
+d) Seleccionamos México como *Ubicación de Analytics*, aceptaremos todos los términos y click en *Crear proyecto*
+
+<img src="./img/setup/03.png" width="40%"/>
+
+e) En la pantalla de inicio del proyecto, buscar el ícono de android y dar click sobre él
+
+<img src="./img/setup/04.png" width="40%"/>
+
+f) Registrar el nombre del paquete de la aplicación y su nick
+
+<img src="./img/setup/05.png" width="40%"/>
+
+g) Descargar el archivo *google-services.json* y moverlo a la carpeta app del proyecto, como se indica en la imagen
+
+<img src="./img/setup/06.png" width="40%"/>
+
+
+Vamos a comenzar instalando lo necesario para hacer funcionar Firebase
+
+1. Abrir el archivo *build.gradle* que está en la raíz de nuestro proyecto.
+
+2. Copiar los repositorios necesarios tal como se muestra a continuación:
+
+```kotlin
+plugins {
+ 	...
+    id 'com.google.gms.google-services' version '4.3.15' apply false
+}
+
+```
+
+2. Abrir *app/build.gradle* y aplicar el plugin de fabric después del plugin *com.android.application*:
 
 ```groovy
+plugins{
+  ...
+	id 'com.google.gms.google-services'
+}
+```
+
+
+
+3. Ahora, agregaremos la BoM de Firebase (Bill of Materials), que nos sirve para tener qué declarar nuestra versión de firebase únicamente en el mismo BoM.
+
+   ```groovy
+   implementation platform('com.google.firebase:firebase-bom:32.1.0')
+   ```
+
+4. En el mismo archivo, agregar la dependencia de FCM
+
+```kotlin
 implementation 'com.google.firebase:firebase-messaging-ktx'
 ```
 
-2. Creamos un clase que extienda de FirebaseMessagingService e Incluimos el servicio de FCM como service en el Manifiesto de nuestra aplicación. Esto sirve para opciones más allá de recibir notificaciones en background (mensajes en foreground, entre otras opciones).
+#### Implementando FCM
+
+1. Creamos un clase que extienda de FirebaseMessagingService e Incluimos el servicio de FCM como service en el Manifiesto de nuestra aplicación. Esto sirve para opciones más allá de recibir notificaciones en background (mensajes en foreground, entre otras opciones).
 
 ```kotlin
 class FirebaseMessaging: FirebaseMessagingService() {
@@ -43,7 +107,7 @@ class FirebaseMessaging: FirebaseMessagingService() {
         </service>
 ```
 
-3.  En el manifest pondremos estas líneas para agregaar un ícono si desde el servicio no se define uno, al igual que el otro metadata para notification channels.
+2. En el manifest pondremos estas líneas para agregaar un ícono si desde el servicio no se define uno, al igual que el otro metadata para notification channels.
 
 ```xml
 <meta-data
@@ -54,7 +118,7 @@ class FirebaseMessaging: FirebaseMessagingService() {
     android:value="DEFAULT_CHANNEL" />
 ```
 
-4. En el *onCreate* del *MainActivity*, obtener el token FCM de nuestro dispositivo cliente e imprimirlo en el log (para pruebas).
+3. En el *onCreate* del *MainActivity*, obtener el token FCM de nuestro dispositivo cliente e imprimirlo en el log (para pruebas).
 
 ```kotlin
 FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
@@ -70,12 +134,11 @@ FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener {
         })
 ```
 
-
-5. Ejecutaremos una prueba de notificación desde nuestra consola Firebase. En la barra lateral del menú principal, click a la opción *CloudMessaging*.
+4. Ejecutaremos una prueba de notificación desde nuestra consola Firebase. En la barra lateral del menú principal, click a la opción *CloudMessaging*.
 
 <img src="img/05.png" width="40%"/>
 
-6. Click en ***Send your first message***
+5. Click en ***Send your first message***
 
 <img src="img/06.png" width="40%"/>
 
