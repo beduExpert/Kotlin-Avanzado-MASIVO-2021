@@ -71,7 +71,7 @@ android{
 Utilizaremos la siguiente dependencia, para utilizar las clases necesarias de Architecture components.
 
 ```groovy
-implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
+implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
 
 // Room database
     implementation "androidx.room:room-runtime:$room_version"
@@ -252,10 +252,6 @@ Ahora, en ___VehicleListFragment___, asignaremos nuestro adapter con la lista de
 
 
 
-
-
-
-
 ```kotlin
    init {
         prepopulate()
@@ -283,7 +279,7 @@ Corremos la aplicación y verificamos que los vehículos estén en la lista:
 Recuerda comentar el código ___prepopulate___ en nuestro ___ViewModel___.
 
 ```kotlin
-        //prepopulate()
+// prepopulate()
 ```
 
 

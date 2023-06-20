@@ -21,25 +21,19 @@ Vamos a aprender implementar lo esencial del patrón MVP en un proyecto previame
 
 Para esto, utilizaremos el [Proyecto base](base) en esta carpeta e iremos implementando las modificaciones.
 
-1. Vamos a utilizar a AddContactActivity para hacer nuestra migración, para eso creamos un nuevo package llamado *addcontact* en donde se encuentra nuestro *MainActivity*.
+1. Vamos a utilizar a `AddContactActivity` para hacer nuestra migración, para eso creamos un nuevo package llamado *addcontact* en donde se encuentra nuestro `MainActivity`.
 
-2. Ahí colocaremos nuestros archivos *AddContactActivity* (nuestro View) y la clase *Contact* (nuestro Model) y creamos una tercera clase llamado *AddContactPresenter*
+2. Ahí colocaremos nuestros archivos `AddContactActivity` (nuestro View) y la clase `Contact` (nuestro Model) y creamos una tercera clase llamado `AddContactPresenter`
 
 <img src="img/01.png" width="25%"/>
 
-3. Agregamos al *AddContactPresenter* el siguiente código comentado:
+3. Agregamos al `AddContactPresenter` el siguiente código comentado:
 
 ```kotlin
-package org.bedu.recyclercontacts.addcontact
-
-import android.app.Activity
-import android.content.Intent
-
-
 class AddContactPresenter( view: View) { //view es la vista a la que estará atado (AddContactPresenter)
 
     //el Model al que estamos atados
-    var contact=Contact()
+    var contact = Contact()
 
     //Actualizamos nuestro Model desde el presenter cada que se actualiza el nombre
     fun updateName(name: String){
@@ -67,7 +61,7 @@ class AddContactPresenter( view: View) { //view es la vista a la que estará ata
 }
 ```
 
-4. Cambiaremos la lógica de AddContactActivity para que se vuelva presenter:
+4. Cambiaremos la lógica de `AddContactActivity` para que se vuelva presenter:
 
 ```kotlin
 class AddContactActivity : AppCompatActivity(),AddContactPresenter.View {
@@ -75,43 +69,47 @@ class AddContactActivity : AppCompatActivity(),AddContactPresenter.View {
     //nueva instancia de nuestro presentador
     private val presenter = AddContactPresenter(this)
 
+    private lateinit var binding: ActivityAddContactBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_add_contact)
 
-        //llamamos la función addContact
-        buttonAdd.setOnClickListener{
-            addContact()
+        binding = ActivityAddContactBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        with(binding) {
+            buttonAdd.setOnClickListener{
+                addContact()
+            }
+
+            //Cuando el texto cambia (onTextChanged), el presenter hace una actualización de nuestro nombre
+            editName.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(p0: Editable?) {
+                }
+
+                override fun beforeTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+                }
+
+                override fun onTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                    presenter.updateName(s.toString())
+                }
+            })
+
+            //Cuando el texto cambia (onTextChanged), el presenter hace una actualización de nuestro teléfono
+            editPhone.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(p0: Editable?) {
+                }
+
+                override fun beforeTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+                }
+
+                override fun onTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                    presenter.updatePhone(s.toString())
+                }
+            })
         }
-
-        //Cuando el texto cambia (onTextChanged), el presenter hace una actualización de nuestro nombre
-        editName.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                presenter.updateName(s.toString())
-            }
-        })
-
-        //Cuando el texto cambia (onTextChanged), el presenter hace una actualización de nuestro teléfono
-        editPhone.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                presenter.updatePhone(s.toString())
-            }
-        })
     }
 
     //implementación de la interfaz definida en presenter, en este caso sólo llama a la función del presenter
