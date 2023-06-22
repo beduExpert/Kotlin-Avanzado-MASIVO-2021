@@ -71,6 +71,7 @@ class VehicleListFragment : Fragment(){
     }
 
     private fun setupVehicleList(){
+
         if(viewModel!=null){
             adapter = VehicleAdapter(viewModel)
             binding.list.adapter = adapter

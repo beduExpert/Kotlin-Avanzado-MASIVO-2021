@@ -84,13 +84,14 @@ b) Corregir el error encontrado en el Test Unitario.
 ```kotlin
 internal fun activeVehiclesPercentage(vehicles: List<Vehicle>?): Float{
 
-    if(vehicles == null || vehicles.isEmpty()){
+    val activeVehicles = vehicles?.count{it.isWorking} ?: 0
+    val totalVehicles = vehicles?.size ?: 0
+
+    if (totalVehicles == 0 ){
         return 0f
     }
 
-    val activeVehicles = vehicles.count{it.isWorking}
-    val totalVehicles = vehicles?.size
-    return ( (totalVehicles- activeVehicles)/totalVehicles.toFloat() ) * 100f
+    return ( activeVehicles/totalVehicles.toFloat() ) * 100f
 }
 ```
 

@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewModel"
-            type="org.bedu.roomvehicles.addeditvehicle.AddEditViewModel"
+            type="org.bedu.architecturecomponents.addeditvehicle.AddEditViewModel"
             />
     </data>
 

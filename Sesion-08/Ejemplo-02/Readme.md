@@ -28,10 +28,10 @@ Estas son las dependencias para test unitario
 
 ```groovy
 // librerías de test unitario
-testImplementation 'junit:junit:4.+'
-testImplementation "com.google.truth:truth:1.1"
-testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.2.1"
-testImplementation "androidx.arch.core:core-testing:2.0.0"
+testImplementation "com.google.truth:truth:1.1.2"
+testImplementation 'junit:junit:4.13.2'
+testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1"
+testImplementation "androidx.arch.core:core-testing:2.2.0"
 ```
 
 
@@ -79,19 +79,17 @@ Para obtener nuestros vehículos, sobreescribimos ___getVehicles___, únicamente
 
 
 ```kotlin
-override fun getVehicles(): LiveData<List<Vehicle>> {
-    return observableVehicles
-}
+override fun getVehicles() = observableVehicles
 ```
 
 Para remover un vehículo, debemos recuperar la lista dentro del observable y asignarlo a una lista mutable para poder eliminar el vehículo dado y reasignarlo al observable.
 
 ```kotlin
 override suspend fun removeVehicle(vehicle: Vehicle) {
-        val newList: MutableList<Vehicle> = observableVehicles.value?.toMutableList() ?: mutableListOf()
-        newList.remove(vehicle)
-        observableVehicles.value = newList
-    }
+      val newList = observableVehicles.value?.toMutableList() ?: mutableListOf()
+      newList.remove(vehicle)
+      observableVehicles.value = newList
+}
 ```
 
 De forma similar, sobreescribimos ___addVehicle___ para poder agregar un nuevo elemento al observable.
@@ -159,7 +157,7 @@ class VehicleListViewModelTest{
 Dentro de la clase, declaramos un atributo _vehicleRepository_ que será utilizado en los tests. También declaramos una instancia del viewModel que va ser sometido a testing
 
 ```kotlin
-private lateinit var vehicleRepository: VehicleRepository
+private lateinit var vehicleRepository: FakeVehicleRepository
 private lateinit var viewModel: VehicleListViewModel
 ```
 
@@ -192,21 +190,19 @@ Ahora escribiremos nuestro primer test que verificará que al eliminar un coche,
 
 ```kotlin
 @Test
-fun removeVehicle_removesVehicle(){
+fun removeVehicle_removesVehicle() {
     val observer = Observer<List<Vehicle>>{}
 
     try {
-
         viewModel.vehicleList.observeForever(observer)
 
-        // When: Cuando probamos agregar un nuevo evento con nuestro ViewModel
+        // When
         viewModel.removeVehicle(jetta)
 
-        //Then: Entonces el evento fue disparado (eso provoca que no sea nulo y que tenga alguno de los estados:
-        //      loading, success, error)
+        //Then
         val vehicles = viewModel.vehicleList.value
-
-        assertThat(vehicles).contains(jetta)
+        assertThat(vehicles).contains(vento)
+        assertThat(vehicles).doesNotContain(jetta)
 
     } finally {
         viewModel.vehicleList.removeObserver(observer) // eliminamos el observer para evitar memory leaks
@@ -221,24 +217,18 @@ Si intentamos correr la prueba, obtendremos el siguiente error:
 
 > java.lang.RuntimeException: Method getMainLooper in android.os.Looper not mocked.
 
-
-
-Esto se debe a que el scheduler por defecto utiliza dependencias de Android no presentes en JUnit, por lo que podríamos utilizar el framework ___robolectric___ para suplir esto, pero para este caso, utilizaremos la siguiente regla:
-
-
+Esto se debe a que el scheduler por defecto utiliza dependencias de Android no presentes en JUnit así que utilizaremos la siguiente regla:
 
 ```kotlin
 @get:Rule
 var instantExecutorRule = InstantTaskExecutorRule()
 ```
 
-
-
 Ahora al intentar correr el test, obtenemos el siguiente error:
 
 > Exception in thread "main" java.lang.IllegalStateException: Module with the Main dispatcher had failed to initialize. For tests Dispatchers.setMain from kotlinx-coroutines-test module can be used
 
-La razón por la cual sucede esto, es que se requiere un ___coroutine dispatcher___ para operar con las corrutinas de nuestro repositorio. Crearemos una regle que asigne un ___TestCoroutineDispatcher___ al principio de nuestro test y lo limpie al final.
+La razón por la cual sucede esto, es que se requiere un ___coroutine dispatcher___ para operar con las corrutinas de nuestro repositorio. Crearemos una regla que asigne un ___TestCoroutineDispatcher___ al principio de nuestro test y lo limpie al final.
 
 ```kotlin
 @ExperimentalCoroutinesApi

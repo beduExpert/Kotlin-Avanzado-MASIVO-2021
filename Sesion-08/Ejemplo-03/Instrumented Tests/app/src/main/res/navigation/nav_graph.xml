@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/vehicleListFragment"
-        android:name="org.bedu.roomvehicles.vehiclelist.VehicleListFragment"
+        android:name="org.bedu.architecturecomponents.vehiclelist.VehicleListFragment"
         android:label="fragment_vehicle_list"
         tools:layout="@layout/fragment_vehicle_list" >
         <action
@@ -16,7 +16,7 @@
     </fragment>
     <fragment
         android:id="@+id/addEditFragment"
-        android:name="org.bedu.roomvehicles.addeditvehicle.AddEditFragment"
+        android:name="org.bedu.architecturecomponents.addeditvehicle.AddEditFragment"
         android:label="fragment_add_edit"
         tools:layout="@layout/fragment_add_edit" >
         <action

@@ -6,14 +6,13 @@
     <data>
         <variable
             name="vehicleListViewModel"
-            type="org.bedu.roomvehicles.vehiclelist.VehicleListViewModel"
+            type="org.bedu.architecturecomponents.vehiclelist.VehicleListViewModel"
             />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
-
         <TextView
             android:id="@+id/vehicle_number_title"
             android:layout_width="wrap_content"
@@ -48,14 +47,14 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list"
-            android:name="org.bedu.roomvehicles.Room.VehicleListFragment"
+            android:name="org.bedu.architecturecomponents.vehiclelist.VehicleListFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layoutManager="LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/active_vehicles_title"
+            app:layout_constraintTop_toBottomOf="@id/active_vehicles"
             tools:context=".vehiclelist.VehicleListFragment"
             tools:listitem="@layout/vehicle_item" />
 

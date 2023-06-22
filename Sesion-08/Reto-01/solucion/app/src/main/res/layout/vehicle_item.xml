@@ -8,11 +8,11 @@
 
         <variable
             name="vehicle"
-            type="org.bedu.roomvehicles.data.local.Vehicle" />
+            type="org.bedu.architecturecomponents.data.local.Vehicle" />
 
         <variable
             name="viewModel"
-            type="org.bedu.roomvehicles.vehiclelist.VehicleListViewModel" />
+            type="org.bedu.architecturecomponents.vehiclelist.VehicleListViewModel" />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
