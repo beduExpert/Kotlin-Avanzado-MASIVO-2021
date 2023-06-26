@@ -10,8 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.bedu.architecturecomponents.R
 import org.bedu.architecturecomponents.data.local.Vehicle
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 
 /**
@@ -29,10 +27,6 @@ class VehicleListFragment : Fragment(), ItemListener {
 
     }
 
-    fun getListener(): ItemListener {
-        return this
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -47,9 +41,6 @@ class VehicleListFragment : Fragment(), ItemListener {
                 R.id.action_vehicleListFragment_to_addEditFragment
             )
         }
-
-
-        val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
 
         return view

@@ -8,10 +8,6 @@ android {
     namespace 'org.bedu.architecturecomponents'
     compileSdk 33
 
-    buildFeatures {
-        dataBinding true
-    }
-
     defaultConfig {
         applicationId "org.bedu.architecturecomponents"
         minSdk 24

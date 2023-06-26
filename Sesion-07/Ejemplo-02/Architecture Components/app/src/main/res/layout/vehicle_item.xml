@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="android.widget.CompoundButton" />
-
         <variable
             name="vehicle"
             type="org.bedu.architecturecomponents.data.local.Vehicle" />
@@ -14,6 +12,7 @@
             name="viewModel"
             type="org.bedu.architecturecomponents.vehiclelist.VehicleListViewModel" />
     </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -26,13 +25,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{vehicle.platesNumber}"
+            tools:text="2afxso"
             android:textAppearance="?attr/textAppearanceListItem"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <TextView
             android:layout_marginStart="16dp"
+            tools:text="Volkswagen"
             android:text="@{vehicle.model}"
             android:id="@+id/model_name"
             android:layout_width="wrap_content"
@@ -41,6 +42,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:textAppearance="?attr/textAppearanceListItem" />
+
         <ImageButton
             android:id="@+id/button_edit"
             android:onClick="@{() -> viewModel.onEdit(vehicle.id)}"
@@ -49,16 +51,17 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:src="@drawable/ic_edit"/>
+            android:src="@drawable/ic_edit" />
+
         <ImageButton
+            android:layout_gravity="right"
             android:id="@+id/button_delete"
+            android:onClick="@{() -> viewModel.removeVehicle(vehicle)}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{() -> viewModel.removeVehicle(vehicle)}"
-            android:layout_gravity="right"
             app:layout_constraintEnd_toStartOf="@id/button_edit"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:src="@drawable/ic_delete"/>
+            android:src="@drawable/ic_delete" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

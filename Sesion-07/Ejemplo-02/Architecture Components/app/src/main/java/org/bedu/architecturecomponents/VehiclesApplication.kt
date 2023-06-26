@@ -1,8 +1,8 @@
 package org.bedu.architecturecomponents
 
 import android.app.Application
-import org.bedu.architecturecomponents.data.VehicleRepository
 import org.bedu.architecturecomponents.data.local.VehicleDb
+import org.bedu.architecturecomponents.data.local.VehicleRepository
 
 class VehiclesApplication: Application() {
 

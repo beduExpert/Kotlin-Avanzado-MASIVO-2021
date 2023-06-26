@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 
 
 @Entity(indices = [Index(value = ["plates_number"], unique = true)])
-data class Vehicle  constructor(
+data class Vehicle @JvmOverloads constructor(
         @PrimaryKey(autoGenerate = true) val id: Int = 0,
         @ColumnInfo val model: String?,
         @ColumnInfo val brand: String?,

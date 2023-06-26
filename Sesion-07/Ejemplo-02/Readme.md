@@ -72,63 +72,11 @@ Utilizaremos la siguiente dependencia, para utilizar las clases necesarias de Ar
 
 ```groovy
 implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
-
-// Room database
-    implementation "androidx.room:room-runtime:$room_version"
-    implementation "androidx.room:room-ktx:$room_version" // nos servirá para usar corrutinas con room
-    kapt "androidx.room:room-compiler:$room_version"
 ```
 
 
 
-#### Base de datos 
-
-Crearemos nuevamente la base de datos, pero en este caso de forma ligeramente diferente.
-
-Abriremos nuestro data class ***Vehicles***, tenemos nuestra Entity declarada. Agregaremos la anotación ___@JvmOverloads___, que crea métodos overload para Java, debido a los valores por defecto.
-
-```kotlin
-data class Vehicle @JvmOverloads constructor()
-```
-
-Ahora crearemos nuestro VehicleDao nuevamente. Nótese que algunos métodos llevan el keyword ***suspend***. 
-
-```kotlin
-@Dao
-interface VehicleDao {
-
-    @Insert
-    suspend fun insertVehicle(vehicle: Vehicle)
-  
-    @Insert
-    suspend fun insertAll(vehicle: List<Vehicle>)
-
-    @Update
-    suspend fun updateVehicle(vehicle: Vehicle)
-
-    @Delete
-    suspend fun removeVehicle(vehicle: Vehicle)
-
-    @Query("DELETE FROM Vehicle WHERE id=:id")
-    suspend fun removeVehicleById(id: Int)
-
-    @Delete
-    suspend fun removeVehicles(vararg vehicles: Vehicle)
-
-    @Query("SELECT * FROM Vehicle")
-	  fun getVehicles(): List<Vehicle>
-
-    @Query("SELECT * FROM Vehicle WHERE id = :id")
-    suspend fun getVehicleById(id: Int): Vehicle
-
-    @Query("SELECT * FROM Vehicle WHERE plates_number = :platesNumber")
-    suspend fun getVehicleByPlates(platesNumber: String) : Vehicle
-}
-}
-
-```
-
-A diferencia de lo anterior, aquí utilizamos ___suspend___ para declarar los métodos como suspend functions, que serán ejecutados en una corrutina. 
+#### Repositorio
 
 Lo siguiente es crear una clase que actúe como interfaz entre el Dao y quien requiera la información. Esta clase será nuestro __Repositorio__.  
 
@@ -161,13 +109,10 @@ suspend fun populateVehicles(vehicles: List<Vehicle>) = withContext(ioDispatcher
 El repositorio deberá ser único y accesible para todos los ViewModels, es por eso que crearemos una instancia en nuestra aplicación y desde ahí realizaremos las operaciones.
 
 ```kotlin
-class VehiclesApplication: Application() {
-
-    val vehicleRepository: VehicleRepository
+val vehicleRepository: VehicleRepository
         get() = VehicleRepository(
             VehicleDb.getInstance(this)!!.vehicleDao()
         )
-}
 ```
 
 Debido a que nuestro constructor requiere al menos el ___Dao___, se lo proporcionamos mediante nuesto database obtenido con el singleton ___getInstance()___. 
@@ -200,74 +145,69 @@ class VehicleListViewModel(
 por el momento, requeriremos únicamente de la lista de vehículos, por lo que declaramos esta variable. También utilizaremos un método temporal para poblar nuestra base de datos (es un truco que usaremos una sola vez ;) ).
 
 ```kotlin
-private val vehicleRepository: VehicleRepository): ViewModel(){
 
-    private var _vehicles: List<Vehicle> = listOf()
+  private var _vehicles: List<Vehicle> = listOf()
 
-    init{
-        prepopulate()
-    }
+  init{
+      prepopulate()
+  }
 
-    fun getVehicleList(): List<Vehicle>{
-        _vehicles = vehicleRepository.getVehicles()
-        return _vehicles
-    }
+  fun getVehicleList(): List<Vehicle>{
+      _vehicles = vehicleRepository.getVehicles()
+      return _vehicles
+  }
 
-    fun prepopulate(){
-        val vehicles = listOf(
-            Vehicle(model = "Vento",brand = "Volkswagen",platesNumber = "STF0321",isWorking = true),
-            Vehicle(model = "Jetta",brand = "Volkswagen",platesNumber = "FBN6745",isWorking = true)
-        )
+  fun prepopulate(){
+      val vehicles = listOf(
+          Vehicle(model = "Vento",brand = "Volkswagen",platesNumber = "STF0321",isWorking = true),
+          Vehicle(model = "Jetta",brand = "Volkswagen",platesNumber = "FBN6745",isWorking = true)
+      )
 
-        viewModelScope.launch {
-            vehicleRepository.populateVehicles(vehicles)
+      viewModelScope.launch {
+          vehicleRepository.populateVehicles(vehicles)
+      }
+
+```
+
+Ahora, en ___VehicleListFragment___, Crearemos un atributo que almacenará una instancia de nuestro `ViewModel`
+
+```kotlin
+ private lateinit var viewModel: VehicleListViewModel
+```
+
+Y le asignamos una instancia en `onCreateView`
+
+```kotlin
+viewModel = VehicleListViewModel(
+    (requireContext().applicationContext as VehiclesApplication).vehicleRepository
+)
+```
+
+Crearemos un nuevo método para llenar la lista de vehículos
+
+```kotlin
+private fun setupVehicleList(){
+
+    lifecycleScope.launch {
+        withContext(Dispatchers.IO) {
+            val vehicleList = viewModel.getVehicleList().toMutableList()
+						adapter = VehicleAdapter(vehicleList, this@VehicleListFragment)   
         }
+      recyclerVehicle.adapter = adapter
     }
+}
 ```
 
 
 
-Ahora, en ___VehicleListFragment___, asignaremos nuestro adapter con la lista de vehículos recuperada. Crearemos un executor donde recuperaremos la lista de vehículos, y después asignaremos nuestro adapter al RecyclerView.
+Y la utilizaremos en el método `onViewCreated`
 
 ```kotlin
-    private fun setupVehicleList(){
-        if(viewModel!=null){
-            val executor: ExecutorService = Executors.newSingleThreadExecutor()
-          
-            executor.execute(Runnable {
+override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
 
-                val vehicleArray =viewModel.getVehicleList()
-                Log.d("Vehicle","Adapter, $vehicleArray")
-
-                Handler(Looper.getMainLooper()).post(Runnable {
-                    adapter = VehicleAdapter(vehicleArray?.toMutableList(), getListener())
-                    recyclerVehicle.adapter = adapter
-                })
-            })
-        } 
-    }
-```
-
-
-
-
-
-```kotlin
-   init {
-        prepopulate()
-    }
-
-    fun prepopulate(){
-        val vehicles = listOf(
-            Vehicle(model = "Vento",brand = "Volkswagen",platesNumber = "STF0321",isWorking = true),
-            Vehicle(model = "Jetta",brand = "Volkswagen",platesNumber = "FBN6745",isWorking = true)
-        )
-
-        viewModelScope.launch {
-            vehicleRepository.populateVehicles(vehicles)
-        }
-
-    }
+    setupVehicleList()
+}
 ```
 
 Corremos la aplicación y verificamos que los vehículos estén en la lista:
@@ -282,28 +222,9 @@ Recuerda comentar el código ___prepopulate___ en nuestro ___ViewModel___.
 // prepopulate()
 ```
 
+#### Explorando el Adapter
 
-
-#### Modificar el Adapter
-
-Actualmente, nuestro adapter recibe la lista de vehículos, algo indeseable puesto que la información debe ser manejada únicamente por el ViewModel, además de que esta aproximación tiene el inconveniente de tener qué actualizar cada modificación en la lista, por lo que cambiaremos esta estrategia por una aproximación más sencilla y eficiente: ___DiffUtil___. Esta herramienta compara una lista vieja de la nueva y si existen diferencias, determina la acción realizada (agregar, eliminar, editar), haciendo el trabajo por nosotros. Crearemos una clase que la implemente:
-
-```kotlin
-class VehicleDiffCallback : DiffUtil.ItemCallback<Vehicle>() {
-    override fun areItemsTheSame(oldItem: Vehicle, newItem: Vehicle): Boolean {
-				TODO("Not yet implemented")
-    }
-
-    override fun areContentsTheSame(oldItem: Vehicle, newItem: Vehicle): Boolean {
-				TODO("Not yet implemented")
-    }
-}
-```
-
-* ___areItemsTheSame___ compara que dos objetos sean los mismos a través de alguna propiedad única, devolviendo true si es el caso, o false si no. Aquí compararemos los objetos por su id. Con esta propiedad sabremos si un item fue actualizado.
-* ___areContentsTheSame___ verifica todos los campos entre un objeto viejo y uno nuevo para saber si algún elemento fue actualizado. En este caso, compararemos los dos objetos como tal.
-
-Con la descripción anterior, nuestro código queda de la siguiente forma:
+Anteriormente hemos utilizado los adapters recibiendo una lista de items en su constructor, algo indeseable puesto que la información debe ser manejada únicamente por el ViewModel, además de que esta aproximación tiene el inconveniente de tener qué actualizar cada modificación en la lista, por lo que para este adapter utilizaremos una aproximación más sencilla: ___DiffUtil___. Esta herramienta compara una lista vieja de la nueva y si existen diferencias, determina la acción realizada (agregar, eliminar, editar), haciendo el trabajo por nosotros. Crearemos una clase que la implemente:
 
 ```kotlin
 class VehicleDiffCallback : DiffUtil.ItemCallback<Vehicle>() {
@@ -317,7 +238,8 @@ class VehicleDiffCallback : DiffUtil.ItemCallback<Vehicle>() {
 }
 ```
 
-Esta clase será implementado en nuestro Adapter, que ahora en vez de extender de ___Adapter()___, heredarán de ___ListAdapter___. 
+* ___areItemsTheSame___ compara que dos objetos sean los mismos a través de alguna propiedad única, devolviendo true si es el caso, o false si no. Aquí compararemos los objetos por su id. Con esta propiedad sabremos si un item fue actualizado.
+* ___areContentsTheSame___ verifica todos los campos entre un objeto viejo y uno nuevo para saber si algún elemento fue actualizado. En este caso, compararemos los dos objetos como tal.
 
 
 
@@ -335,11 +257,11 @@ Esta opción Agregará un elemento <layout> junto a un <data></data>. Aquí decl
 <data>
         <variable
             name="vehicle"
-            type="org.bedu.roomvehicles.data.local.Vehicle" />
+            type="org.bedu.architecturecomponents.data.local.Vehicle" />
 
         <variable
             name="viewModel"
-            type="org.bedu.roomvehicles.vehiclelist.VehicleListViewModel" />
+            type="org.bedu.architecturecomponents.vehiclelist.VehicleListViewModel" />
     </data>
 ```
 
@@ -507,7 +429,7 @@ Para terminar este ___Fragment___, ataremos nuestro viewModel al su layout. El c
 <data>
     <variable
         name="vehicleListViewModel"
-        type="org.bedu.roomvehicles.vehiclelist.VehicleListViewModel"
+        type="org.bedu.architecturecomponents.vehiclelist.VehicleListViewModel"
         />
 </data>
 ```
@@ -542,19 +464,48 @@ Debemos asegurarnos de que ___onCreateView___ regrese ___return binding.root___ 
 * addButton por binding.buttonAdd
 * recycleVehicle por binding.list
 
-
-
 Eliminamos todos las líneas que contengan el método ___findViewByID___ y corremos la aplicación,
 
-Esta debe marchar como si nada.
 
 
+#### Lista de vehículos y LiveData
+
+Para hacer que la lista de vehículos se actualice cuando haya una modificación en la base de datos, podemos envolver la lista en un objeto `LiveData`. Dicho wrapper dará la opción de ejecutar una función cada vez que se modifique la lista, por lo cual avisaremos al recyclerview que hubo una modificación.
+
+Primero, tenemos qué hacer que nuestra query `getVehicles` devuelva un `LiveData`.
+
+```kotlin
+@Query("SELECT * FROM Vehicle")
+fun getVehicles(): LiveData<List<Vehicle>>
+```
+
+Después, actualizamos nuestra función `getVehicles ` de nuestro `VehicleRepository`.
+
+```kotlin
+fun getVehicles() = vehicleDao.getVehicles()
+```
+
+Declaramos la siguiente variable que será el elemento del ViewModel a observar desde nuestro fragment.
+
+```kotlin
+val vehicleList = vehicleRepository.getVehicles()
+```
+
+Y finalmente, en `VehicleListFragment` observaremos cualquier cambio y actualizaremos la lista cuando eso suceda.
+
+```kotlin
+viewModel.vehicleList.observe(viewLifecycleOwner, Observer {
+    it?.let {
+        adapter.submitList(it)
+    }
+})
+```
+
+Después de estos cambios, la lista debe seguir desplegándose.
 
 #### Agregar un vehículo
 
 Para agregar un vehículo, utilizamos AddEditFragment. Este tendrá básicamente los mismos componentes que el Fragment anterior.
-
-
 
 Crearemos un ___AddEditViewModel___ para el fragment, 
 
@@ -573,7 +524,7 @@ Dentro de esta, vamos a definir algunas de las variables que utilizaremos. En es
 
 
 
-Los usaremos al crear un nuevo vehículo. Para esto, requeriremos crear un método en nuestro repositorio para agregar el vehículo. Escribimos el siguiente método en ___TasksRepository___.
+Los usaremos al crear un nuevo vehículo. Para esto, requeriremos crear un método en nuestro repositorio para agregar el vehículo. Escribimos el siguiente método en `VehicleRepository`.
 
 
 
@@ -636,7 +587,7 @@ buttonAddCar.setOnClickListener{
     <data>
         <variable
             name="viewModel"
-            type="org.bedu.roomvehicles.addeditvehicle.AddEditViewModel"
+						type="org.bedu.architecturecomponents.addeditvehicle.AddEditViewModel"
             />
     </data>
 ```
@@ -648,15 +599,15 @@ Crearemos esos métodos en ___AddEditViewModel___. Para un EditText, usaremos el
 
 
 ```kotlin
-fun setPlates(s: CharSequence, start:Int, before: Int, count:Int){
+fun setPlates(s: CharSequence, start:Int, before: Int, count:Int) {
         platesNumber = s.toString()
     }
 
-    fun setBrandName(s: CharSequence, start:Int, before: Int, count:Int){
+    fun setBrandName(s: CharSequence, start:Int, before: Int, count:Int) {
         brand = s.toString()
     }
 
-    fun setModelName(s: CharSequence, start:Int, before: Int, count:Int){
+    fun setModelName(s: CharSequence, start:Int, before: Int, count:Int) {
             model = s.toString()
         }
 ```
@@ -666,7 +617,7 @@ fun setPlates(s: CharSequence, start:Int, before: Int, count:Int){
 Para el caso del booleano ___isWorking___, utilizaremos el siguiente:
 
 ```kotlin
-    fun setIsWorking(button: CompoundButton,value: Boolean){
+    fun setIsWorking(button: CompoundButton,value: Boolean) {
         isWorking = value
     }
 ```
@@ -773,30 +724,20 @@ fun newVehicle() = viewModelScope.launch{
 Para observar nuestra bandera y navegar cuando se levante implementamos lo siguiente:
 
 ```kotlin
-    private fun setupVehicleList(){
-        if(viewModel!=null){
-            adapter = VehicleAdapter(viewModel)
-            binding.list.adapter = adapter
-
-            viewModel.vehicleList.observe(viewLifecycleOwner, Observer {
-                it?.let {
-                    adapter.submitList(it)
-                }
-            })
-
-        }
+fun setupNavigation() {
+        viewModel.vehicleDone.observe(viewLifecycleOwner, Observer {
+            if(it){
+                findNavController().navigate(
+                        R.id.action_addEditFragment_to_vehicleListFragment
+                )
+            }
+        })
     }
 ```
 
 
 
 Este método se utiliza en ___onCreateView___.
-
-
-
-
-
-
 
 [`Anterior`](../Ejemplo-02) | [`Siguiente`](../Proyecto/Readme.md)      
 

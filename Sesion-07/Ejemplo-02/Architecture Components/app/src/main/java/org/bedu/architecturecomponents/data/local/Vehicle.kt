@@ -6,7 +6,6 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 
-//@Entity
 @Entity(indices = [Index(value = ["plates_number"], unique = true)])
 data class Vehicle @JvmOverloads constructor(
         @PrimaryKey(autoGenerate = true) val id: Int = 0,

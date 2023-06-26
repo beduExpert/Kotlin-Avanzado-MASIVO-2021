@@ -5,15 +5,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import org.bedu.architecturecomponents.R
 import org.bedu.architecturecomponents.data.local.Vehicle
 
 class VehicleAdapter(
     private val vehicleArray: MutableList<Vehicle>?,
-    val itemListener : ItemListener
+    private val itemListener : ItemListener
 ) :
-    RecyclerView.Adapter<VehicleAdapter.ViewHolder>() {
+    ListAdapter<Vehicle, VehicleAdapter.ViewHolder>(VehicleDiffCallback()) {
 
     /**
      * Provide a reference to the type of views that you are using
@@ -80,4 +82,14 @@ class VehicleAdapter(
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = vehicleArray?.size ?: 0
 
+}
+
+class VehicleDiffCallback : DiffUtil.ItemCallback<Vehicle>() {
+    override fun areItemsTheSame(oldItem: Vehicle, newItem: Vehicle): Boolean {
+        return oldItem.id == newItem.id
+    }
+
+    override fun areContentsTheSame(oldItem: Vehicle, newItem: Vehicle): Boolean {
+        return oldItem == newItem
+    }
 }
